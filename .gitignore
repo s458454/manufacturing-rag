@@ -1,0 +1,65 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Python environments and packaging
+.venv/
+venv/
+ENV/
+env/
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.secret
+*.pem
+*.p12
+*.pfx
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs, generated outputs and local databases
+*.log
+logs/
+output/
+outputs/
+ai_output/
+*.db
+*.sqlite
+*.sqlite3
+
+# Models, indexes and large generated artifacts
+*.h5
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.faiss
+*.index
+models/*
+!models/main.txt
+
+# Local service volumes
+volumes/
+etcd_data/
+minio_data/
+milvus_data/
+
