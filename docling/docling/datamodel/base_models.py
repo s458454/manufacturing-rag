@@ -467,6 +467,11 @@ class Page(BaseModel):
     parsed_page: SegmentedPdfPage | None = None
     predictions: PagePredictions = PagePredictions()
     assembled: AssembledUnit | None = None
+    # Runtime-only audit information populated by OCR implementations.  It is
+    # intentionally separate from ``DoclingDocument`` so formal document JSON
+    # remains stable while ConversionResult/quality reports can still prove
+    # which page regions and execution providers were actually used.
+    ocr_audit: dict[str, Any] = Field(default_factory=dict)
 
     _backend: Optional["PdfPageBackend"] = (
         None  # Internal PDF backend. By default it is cleared during assembling.

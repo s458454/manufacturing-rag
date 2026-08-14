@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "assets": [
+    {
+      "name": "PP-OCRv6 medium detector",
+      "path": "RapidOcr/onnx/PP-OCRv6/det/PP-OCRv6_det_medium.onnx",
+      "source": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/onnx/PP-OCRv6/det/PP-OCRv6_det_medium.onnx",
+      "sha256": "92078b7355007ccfffcd4c8cd441a3afd4538904d06881b29a155e1e679907c2",
+      "size_bytes": 62119454
+    },
+    {
+      "name": "PP-OCRv6 medium recognizer",
+      "path": "RapidOcr/onnx/PP-OCRv6/rec/PP-OCRv6_rec_medium.onnx",
+      "source": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/onnx/PP-OCRv6/rec/PP-OCRv6_rec_medium.onnx",
+      "sha256": "eef444829dbbe18d7fea59a3f6eb75647518d2b3a9568d27c92e42940204894b",
+      "size_bytes": 76629984
+    },
+    {
+      "name": "PP-OCRv4 0/180 text-line classifier",
+      "path": "RapidOcr/onnx/PP-OCRv4/cls/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+      "source": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/onnx/PP-OCRv4/cls/ch_ppocr_mobile_v2.0_cls_mobile.onnx",
+      "sha256": "e47acedf663230f8863ff1ab0e64dd2d82b838fceb5957146dab185a89d6215c",
+      "size_bytes": 585532
+    },
+    {
+      "name": "RapidOCR rendering font",
+      "path": "RapidOcr/resources/fonts/FZYTK.TTF",
+      "source": "https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.0/resources/fonts/FZYTK.TTF",
+      "sha256": "4065a23df6823c8e2b69a0e76d02f02a6470b8774a5e91086609701ad95cc33f",
+      "size_bytes": 3241748
+    },
+    {
+      "name": "Docling layout Heron weights",
+      "path": "docling-project--docling-layout-heron/model.safetensors",
+      "source": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/model.safetensors",
+      "sha256": "00333a43451945aaf89db8ca9c0a17e75d1537c17db60fdb91aa95f4c7929e0c",
+      "size_bytes": 171658996
+    },
+    {
+      "name": "Docling layout Heron configuration",
+      "path": "docling-project--docling-layout-heron/config.json",
+      "source": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/config.json",
+      "sha256": "fdea30805ce2f5666b147fca941dcdd27ad468e27d6ed21902207d3da056a97d",
+      "size_bytes": 3268
+    },
+    {
+      "name": "Docling layout Heron preprocessor",
+      "path": "docling-project--docling-layout-heron/preprocessor_config.json",
+      "source": "https://huggingface.co/docling-project/docling-layout-heron/resolve/8f39ad3c0b4c58e9c2d2c84a38465abf757272d8/preprocessor_config.json",
+      "sha256": "cd38cd59999e7a95d68e487fbe5132df3d4e5c32a0836add57e6126ba0c4eaf1",
+      "size_bytes": 444
+    },
+    {
+      "name": "Docling layout Heron pinned revision",
+      "path": "docling-project--docling-layout-heron/REVISION",
+      "source": "project-pinned-revision-marker",
+      "sha256": "8084bbc31e333903f4bd839da812667ebd7dca0e27f6a193e372828ae11aabe5",
+      "size_bytes": 40
+    },
+    {
+      "name": "Docling TableFormer V1 accurate configuration",
+      "path": "docling-project--docling-models/model_artifacts/tableformer/accurate/tm_config.json",
+      "source": "https://huggingface.co/docling-project/docling-models/resolve/v2.3.0/model_artifacts/tableformer/accurate/tm_config.json",
+      "sha256": "984e122ceb8ccf84d84c9d2882f6f2302a44b4f1e577babd6289892c36f3cffd",
+      "size_bytes": 7060
+    },
+    {
+      "name": "Docling TableFormer V1 accurate weights",
+      "path": "docling-project--docling-models/model_artifacts/tableformer/accurate/tableformer_accurate.safetensors",
+      "source": "https://huggingface.co/docling-project/docling-models/resolve/v2.3.0/model_artifacts/tableformer/accurate/tableformer_accurate.safetensors",
+      "sha256": "2a7d6c924b3cd12fb99a09280ca9c33a89c5d60b93253617d2e088c1a40374d9",
+      "size_bytes": 212758388
+    },
+    {
+      "name": "PP-LCNet document orientation model",
+      "path": "PageOrientation/PP-LCNet_x1_0_doc_ori/model.onnx",
+      "source": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori_onnx/resolve/7330ab7039123e46af2dc03154b9969aa412c61d/inference.onnx",
+      "sha256": "af9a0a4f317ff0709ce752067807f819cb15d883f8ecad89f28df1c6ee2d9c92",
+      "size_bytes": 6788069
+    }
+  ]
+}

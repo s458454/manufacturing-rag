@@ -106,12 +106,20 @@ class BaseOcrModel(BasePageModel, BaseModelWithOptions):
             bitmap_rects = []
 
         coverage, ocr_rects = find_ocr_rects(page.size, bitmap_rects)
+        page.ocr_audit.update(
+            {
+                "bitmap_coverage_fraction": float(coverage),
+                "bitmap_area_threshold": float(self.options.bitmap_area_threshold),
+                "dominant_bitmap_threshold": float(BITMAP_COVERAGE_TRESHOLD),
+                "force_full_page_ocr": bool(self.options.force_full_page_ocr),
+            }
+        )
 
         # return full-page rectangle if page is dominantly covered with bitmaps
         if self.options.force_full_page_ocr or coverage > max(
             BITMAP_COVERAGE_TRESHOLD, self.options.bitmap_area_threshold
         ):
-            return [
+            selected_rects = [
                 BoundingBox(
                     l=0,
                     t=0,
@@ -120,11 +128,22 @@ class BaseOcrModel(BasePageModel, BaseModelWithOptions):
                     coord_origin=CoordOrigin.TOPLEFT,
                 )
             ]
+            route = "full_page_ocr"
         # return individual rectangles if the bitmap coverage is above the threshold
         elif coverage > self.options.bitmap_area_threshold:
-            return ocr_rects
+            selected_rects = ocr_rects
+            route = "region_ocr"
         else:  # overall coverage of bitmaps is too low, drop all bitmap rectangles.
-            return []
+            selected_rects = []
+            route = "native_only"
+
+        page.ocr_audit.update(
+            {
+                "route_requested": route,
+                "ocr_rectangle_count": len(selected_rects),
+            }
+        )
+        return selected_rects
 
     # Filters OCR cells by dropping any OCR cell that intersects with an existing programmatic cell.
     def _filter_ocr_cells(

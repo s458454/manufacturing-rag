@@ -1,0 +1,13 @@
+{
+  "model_name": "PP-LCNet_x1_0_doc_ori",
+  "model_version": "7330ab7039123e46af2dc03154b9969aa412c61d",
+  "source": "https://huggingface.co/PaddlePaddle/PP-LCNet_x1_0_doc_ori_onnx/resolve/7330ab7039123e46af2dc03154b9969aa412c61d/inference.onnx?download=true",
+  "sha256": "af9a0a4f317ff0709ce752067807f819cb15d883f8ecad89f28df1c6ee2d9c92",
+  "labels": [
+    "0",
+    "90",
+    "180",
+    "270"
+  ],
+  "runtime": "onnxruntime"
+}

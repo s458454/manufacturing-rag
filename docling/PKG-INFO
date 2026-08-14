@@ -25,7 +25,7 @@ Classifier: Programming Language :: Python :: 3.14
 Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Requires-Python: <4.0,>=3.10
 Requires-Dist: certifi>=2024.7.4
-Requires-Dist: docling-core<3.0.0,>=2.86.0
+Requires-Dist: docling-core<3.0.0,>=2.88.0
 Requires-Dist: filetype<2.0.0,>=1.2.0
 Requires-Dist: pluggy<2.0.0,>=1.0.0
 Requires-Dist: pydantic-settings<3.0.0,>=2.3.0

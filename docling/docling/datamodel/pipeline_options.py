@@ -327,7 +327,9 @@ class RapidOcrOptions(OcrOptions):
         Field(
             description=(
                 "Additional parameters to pass through to RapidOCR engine. Use this to override or extend "
-                "default RapidOCR configuration with engine-specific options."
+                "default RapidOCR configuration with engine-specific options. Values must be "
+                "OmegaConf-serializable primitives, lists, or dictionaries; runtime objects such as "
+                "ONNX sessions, session options, and Path instances are not supported."
             )
         ),
     ] = {}

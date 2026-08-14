@@ -1,7 +1,7 @@
 import logging
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Literal, Type, TypedDict
+from typing import Any, Literal, Type, TypedDict
 
 import numpy
 from docling_core.types.doc import BoundingBox, CoordOrigin
@@ -21,6 +21,53 @@ from docling.utils.profiling import TimeRecorder
 from docling.utils.utils import download_url_with_progress
 
 _log = logging.getLogger(__name__)
+
+_RAPIDOCR_ONNX_SESSION_PATHS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("det", ("text_det", "session", "session")),
+    ("cls", ("text_cls", "session", "session")),
+    ("rec", ("text_rec", "session", "session")),
+)
+
+
+def _rapidocr_config_path(path: str | Path | None) -> str | None:
+    """Keep values passed through RapidOCR/OmegaConf configuration primitive-only."""
+
+    return None if path is None else str(path)
+
+
+def _validate_rapidocr_config_value(value: Any, location: str) -> None:
+    """Reject Python runtime objects before RapidOCR passes parameters to OmegaConf."""
+
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            _validate_rapidocr_config_value(item, f"{location}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise TypeError(
+                    "RapidOCR configuration dictionary keys must be strings; "
+                    f"received {type(key)!r} at {location}"
+                )
+            _validate_rapidocr_config_value(item, f"{location}.{key}")
+        return
+    raise TypeError(
+        "RapidOcrOptions.rapidocr_params must contain only OmegaConf-compatible "
+        "primitive values, lists, and dictionaries; "
+        f"received {type(value)!r} at {location}"
+    )
+
+
+def _validate_rapidocr_params(params: dict[str, Any]) -> None:
+    for key, value in params.items():
+        if not isinstance(key, str):
+            raise TypeError(
+                "RapidOcrOptions.rapidocr_params keys must be strings; "
+                f"received {type(key)!r}"
+            )
+        _validate_rapidocr_config_value(value, key)
 
 _ModelPathEngines = Literal["onnxruntime", "torch"]
 _ModelPathTypes = Literal[
@@ -310,6 +357,50 @@ class RapidOcrModel(BaseOcrModel):
         _ModelPathEngines, dict[_ModelPathTypes, _ModelPathDetail]
     ] = _models_by_language[_RAPIDOCR_DEFAULT_LANGUAGE]
 
+    @staticmethod
+    def _onnx_session_providers(reader: Any, path: tuple[str, ...]) -> list[str]:
+        target = reader
+        try:
+            for attribute in path:
+                target = getattr(target, attribute)
+            providers = target.get_providers()
+        except (AttributeError, TypeError) as exc:
+            raise RuntimeError(
+                "RapidOCR did not expose the expected ONNX Runtime session at "
+                f"{'.'.join(path)}"
+            ) from exc
+        if not isinstance(providers, (list, tuple)):
+            raise RuntimeError(
+                "RapidOCR ONNX Runtime get_providers() returned an invalid value at "
+                f"{'.'.join(path)}: {providers!r}"
+            )
+        return [str(provider) for provider in providers]
+
+    def _verify_rapidocr_onnx_providers(self, use_cuda: bool) -> dict[str, list[str]]:
+        """Verify the Provider actually selected by RapidOCR's own sessions."""
+
+        expected_primary = "CUDAExecutionProvider" if use_cuda else "CPUExecutionProvider"
+        provider_audit: dict[str, list[str]] = {}
+        for stage, path in _RAPIDOCR_ONNX_SESSION_PATHS:
+            providers = self._onnx_session_providers(self.reader, path)
+            provider_audit[stage] = providers
+            message = f"rapidocr_{stage}_providers={providers}"
+            _log.info(message)
+            print(message, flush=True)
+            if not providers or providers[0] != expected_primary:
+                if use_cuda:
+                    raise RuntimeError(
+                        "CUDA was requested, but the RapidOCR "
+                        f"{stage} session did not activate CUDAExecutionProvider "
+                        f"as its primary provider. Active providers: {providers}"
+                    )
+                raise RuntimeError(
+                    "Explicit CPU execution was requested, but the RapidOCR "
+                    f"{stage} session did not activate CPUExecutionProvider "
+                    f"as its primary provider. Active providers: {providers}"
+                )
+        return provider_audit
+
     def __init__(
         self,
         enabled: bool,
@@ -339,7 +430,6 @@ class RapidOcrModel(BaseOcrModel):
             # Decide the accelerator devices
             device = decide_device(accelerator_options.device)
             use_cuda = str(AcceleratorDevice.CUDA.value).lower() in device
-            use_dml = accelerator_options.device == AcceleratorDevice.AUTO
             intra_op_num_threads = accelerator_options.num_threads
             gpu_id = 0
             if use_cuda and ":" in device:
@@ -354,6 +444,20 @@ class RapidOcrModel(BaseOcrModel):
             backend_key: _ModelPathEngines = "onnxruntime"
             if backend_enum == EngineType.TORCH:
                 backend_key = "torch"
+            if use_cuda and backend_enum == EngineType.ONNXRUNTIME:
+                # ORT 1.23+ can preload the CUDA/cuDNN libraries bundled with
+                # the already-imported PyTorch wheel.  This keeps an
+                # orientation-disabled diagnostic from depending on the page
+                # model to have performed that process-wide setup first.
+                try:
+                    import onnxruntime as ort
+                except ImportError as exc:
+                    raise RuntimeError(
+                        "onnxruntime-gpu is required for RapidOCR CUDA execution"
+                    ) from exc
+                preload_dlls = getattr(ort, "preload_dlls", None)
+                if callable(preload_dlls):
+                    preload_dlls(directory="")
 
             ocr_lang = _resolve_rapidocr_language(self.options.lang)
             model_set = self._models_by_language[ocr_lang][backend_key]
@@ -397,35 +501,31 @@ class RapidOcrModel(BaseOcrModel):
             params = {
                 # Global settings (these are still correct)
                 "Global.text_score": self.options.text_score,
-                "Global.font_path": font_path,
+                "Global.font_path": _rapidocr_config_path(font_path),
                 # Engine-level ONNXRuntime settings
                 "EngineConfig.onnxruntime.intra_op_num_threads": intra_op_num_threads,
+                "EngineConfig.onnxruntime.use_cuda": use_cuda,
+                "EngineConfig.onnxruntime.cuda_ep_cfg.device_id": gpu_id,
+                "EngineConfig.onnxruntime.use_dml": False,
                 # Engine-level OpenVINO settings
                 "EngineConfig.openvino.inference_num_threads": intra_op_num_threads,
                 # "Global.verbose": self.options.print_verbose,
                 # Detection model settings
-                "Det.model_path": det_model_path,
-                "Det.use_cuda": use_cuda,
-                "Det.use_dml": use_dml,
+                "Det.model_path": _rapidocr_config_path(det_model_path),
                 # Classification model settings
-                "Cls.model_path": cls_model_path,
-                "Cls.use_cuda": use_cuda,
-                "Cls.use_dml": use_dml,
+                "Cls.model_path": _rapidocr_config_path(cls_model_path),
                 # Recognition model settings
-                "Rec.model_path": rec_model_path,
-                "Rec.font_path": font_path,
-                "Rec.rec_keys_path": rec_keys_path,
-                "Rec.use_cuda": use_cuda,
-                "Rec.use_dml": use_dml,
+                "Rec.model_path": _rapidocr_config_path(rec_model_path),
+                "Rec.font_path": _rapidocr_config_path(font_path),
+                "Rec.rec_keys_path": _rapidocr_config_path(rec_keys_path),
                 "Det.engine_type": backend_enum,
                 "Cls.engine_type": backend_enum,
                 "Rec.engine_type": backend_enum,
-                "EngineConfig.paddle.cpu_math_library_num_threads": intra_op_num_threads,
-                "EngineConfig.paddle.use_cuda": use_cuda,
-                "EngineConfig.paddle.cuda_ep_cfg.device_id": gpu_id,
-                "EngineConfig.torch.use_cuda": use_cuda,
-                "EngineConfig.torch.cuda_ep_cfg.device_id": gpu_id,
             }
+            for option_name in ("use_det", "use_cls", "use_rec"):
+                option_value = getattr(self.options, option_name)
+                if option_value is not None:
+                    params[f"Global.{option_name}"] = bool(option_value)
 
             if self.options.rec_font_path is not None:
                 _log.warning(
@@ -438,12 +538,14 @@ class RapidOcrModel(BaseOcrModel):
 
             user_params = self.options.rapidocr_params
             if user_params:
+                _validate_rapidocr_params(user_params)
                 _log.debug("Overwriting RapidOCR params with user-provided values.")
                 params.update(user_params)
 
-            self.reader = RapidOCR(
-                params=params,
-            )
+            self.reader = RapidOCR(params=params)
+            if backend_enum != EngineType.ONNXRUNTIME:
+                return
+            self._provider_audit = self._verify_rapidocr_onnx_providers(use_cuda)
 
     @classmethod
     def download_models(
@@ -483,6 +585,11 @@ class RapidOcrModel(BaseOcrModel):
             return
 
         for page in page_batch:
+            if hasattr(self, "_provider_audit"):
+                page.ocr_audit["onnx_providers"] = {
+                    stage: list(providers)
+                    for stage, providers in self._provider_audit.items()
+                }
             assert page._backend is not None
             if not page._backend.is_valid():
                 yield page
@@ -542,6 +649,13 @@ class RapidOcrModel(BaseOcrModel):
                                 for ix, line in enumerate(result)
                             ]
                             all_ocr_cells.extend(cells)
+
+                    page.ocr_audit["raw_ocr_text_cell_count"] = len(all_ocr_cells)
+                    page.ocr_audit["raw_ocr_mean_confidence"] = (
+                        float(numpy.mean([cell.confidence for cell in all_ocr_cells]))
+                        if all_ocr_cells
+                        else None
+                    )
 
                     # Post-process the cells
                     self.post_process_cells(all_ocr_cells, page)

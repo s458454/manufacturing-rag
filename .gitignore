@@ -42,6 +42,7 @@ logs/
 output/
 outputs/
 ai_output/
+tmp/
 *.db
 *.sqlite
 *.sqlite3
@@ -56,10 +57,37 @@ ai_output/
 *.index
 models/*
 !models/main.txt
+!models/preprocessing-models.manifest.json
+!models/PageOrientation/
+models/PageOrientation/*
+!models/PageOrientation/PP-LCNet_x1_0_doc_ori/
+models/PageOrientation/PP-LCNet_x1_0_doc_ori/*
+!models/PageOrientation/PP-LCNet_x1_0_doc_ori/inference.yml
+!models/PageOrientation/PP-LCNet_x1_0_doc_ori/labels.json
+!models/PageOrientation/PP-LCNet_x1_0_doc_ori/manifest.json
+!models/PageOrientation/PP-LCNet_x1_0_doc_ori/README.md
+!models/docling-project--docling-layout-heron/
+models/docling-project--docling-layout-heron/*
+!models/docling-project--docling-layout-heron/config.json
+!models/docling-project--docling-layout-heron/preprocessor_config.json
+!models/docling-project--docling-layout-heron/REVISION
+!models/docling-project--docling-models/
+models/docling-project--docling-models/*
+!models/docling-project--docling-models/model_artifacts/
+models/docling-project--docling-models/model_artifacts/*
+!models/docling-project--docling-models/model_artifacts/tableformer/
+models/docling-project--docling-models/model_artifacts/tableformer/*
+!models/docling-project--docling-models/model_artifacts/tableformer/accurate/
+models/docling-project--docling-models/model_artifacts/tableformer/accurate/*
+!models/docling-project--docling-models/model_artifacts/tableformer/accurate/README.md
+!models/docling-project--docling-models/model_artifacts/tableformer/accurate/tm_config.json
+
+# Python bytecode generated while running the standalone preprocessing tests.
+code/preprocessing/__pycache__/
+code/preprocessing/tests/__pycache__/
 
 # Local service volumes
 volumes/
 etcd_data/
 minio_data/
 milvus_data/
-

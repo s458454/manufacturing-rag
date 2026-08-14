@@ -75,6 +75,80 @@ V0.1 必须支持：
 
 后续表格解析器和视觉解析器通过统一扩展接口输出标准化文本、结构化 Metadata、来源页码和区域坐标，再进入同一套 RAG 链路。
 
+### 已实现：PDF 页面方向标准化（Docling 前置阶段）
+
+对于 PDF，实际执行链路补充为：
+
+```text
+原始 PDF（只读）
+        ↓
+独立 PP-LCNet_x1_0_doc_ori 页面方向判别与复核
+        ↓
+outputs/preprocessing/<原始文件名-原始SHA256前16位>/normalized/oriented.pdf
+        ↓
+Docling Layout + RapidOCR
+        ↓
+document.md / document.json / regions.json / quality_report.json
+```
+
+页面方向模型是独立预处理，不嵌入 RapidOCR 的文本行方向分类器。`--enable-direction-classifier` 仍只控制 RapidOCR 的 0/180 度文本行分类，不能替代整页方向模型。
+
+方向阶段以当前 PDF `/Rotate` 显示效果渲染整页（默认 150 DPI，允许 120～150 DPI），使用 `PP-LCNet_x1_0_doc_ori` 对 `0/90/180/270` 四个方向评分。仅在最高分不少于 `0.90`、最高分与次高分差值不少于 `0.15` 时提出旋转候选；候选 PDF 再次渲染并要求 `0` 度分数不少于 `0.90`，才接受旋转。空白或证据不足页记为 `not_applicable`；低置信度、复核失败等页记为 `review_required`，均不自动进入索引。
+
+输出 PDF 从原件重新构造，只修改经复核页面的 `/Rotate` 元数据，不将页面栅格化；原始 PDF 不写回。稳定 `document_id` 基于原始文件名与原始 SHA-256 生成，避免标准化副本改变来源身份。
+
+每次处理写出 `orientation_report.json`，逐页记录原始旋转、四类分数、预测方向、应用旋转、复核分数、判定、索引资格、模型身份与运行提供者。Docling 完成后，页面还必须通过固定后置门禁：对应的 Docling 错误会传播到页面；原生文本使用 Docling 的 0.50 POOR/FAIR 边界；OCR 主导的正文使用非表格/图片区域 OCR 均值 0.75，短 OCR 文本使用 0.90；替换符、控制符或明显由符号/单字符碎片主导的文本会被拒绝。Layout 分数只用于诊断，不被解释成无监督框选正确率。拒绝页仍完整保留在 `document.json` 和质量报告，但不得进入 `document.md`。`--page-range FIRST LAST` 采用原始 PDF 的 1-based 闭区间，同时约束方向分类与 Docling；标准化副本仍保留全部原始页及原始页码，报告中会注明实际处理的页码集合。
+
+设备策略为显式指定：默认 `--device cuda`。页面方向模型直接按 `[('CUDAExecutionProvider', cuda_provider_options), 'CPUExecutionProvider']` 创建会话。在 `cuda` 或 `cuda:N` 模式，RapidOCR Det/Cls/Rec 则必须由 Docling 的 `RapidOcrModel` 通过 RapidOCR 3.9.2 的正式配置入口设置 `EngineConfig.onnxruntime.use_cuda=true` 与 `EngineConfig.onnxruntime.cuda_ep_cfg.device_id=N`；RapidOCR 随后自行创建 CUDA 优先、CPU 节点补充的会话。不得把 Python `InferenceSession`、`SessionOptions`、`Path` 或其他自定义对象放进 `RapidOcrOptions.rapidocr_params`，因为该字段先经 OmegaConf 配置合并。RapidOCR 创建后必须检查三个真实内部会话的首 Provider；CUDA 模式必须为 CUDA，显式 CPU 模式必须为 CPU，否则立即终止，防止 CUDA 环境损坏后整个 OCR 静默退化为 CPU-only。当前不提供隐式 `auto` 模式。可通过以下参数调整并保留在审计报告中：
+
+```text
+--orientation-model-dir
+--orientation-render-dpi
+--orientation-min-score
+--orientation-min-margin
+--orientation-postcheck-min-zero
+--disable-page-orientation
+```
+
+模型资产必须预先放置在 `models/PageOrientation/PP-LCNet_x1_0_doc_ori/`：`model.onnx`、官方 `inference.yml`、`labels.json` 与包含真实来源、版本、SHA-256 的 `manifest.json`。运行时不会下载模型；缺失文件、保留 `REPLACE_WITH_...` 占位值或模型 SHA-256 与清单不一致都会直接失败。当前真实模型验收基线 SHA-256 为 `af9a0a4f317ff0709ce752067807f819cb15d883f8ecad89f28df1c6ee2d9c92`。正式 Markdown 投影要求 `docling-core>=2.88.0,<3.0.0`；更旧版本没有关闭图片图表派生 Markdown 所需的序列化参数，程序会在转换前失败。
+
+### 正式入库 Markdown 与审计产物
+
+`document.md` 是唯一允许交给 Chunk、Embedding 和索引模块的正式视图，而不是原始 Docling Markdown 的副本。导出前必须按以下顺序建立引用级语义投影：
+
+1. 收集每个 `TableItem.captions`、`PictureItem.captions` 的显式题注引用；
+2. 递归收集每个表格或图片本体及全部后代（包括 RichTableCell 指向的节点）；
+3. 排除集合为“视觉对象本体及其后代 - 可信的显式题注引用”；
+4. 仅逐页导出 `eligible_for_indexing=true` 的页面，并在每页前写入 `<!-- PDF page N -->` 原始 PDF 页码标记（即使该页所有视觉内容均被隔离，页码标记仍保留）；
+5. 同一个显式题注全篇最多输出一次。
+
+因此，表格内部文字/数字、图片和图表内部 OCR、图表派生表格不会进入 `document.md`；同页不属于视觉区域的正文、标题和列表仍正常保留。`review_required`、`orientation_or_parse_uncertain`、方向报告缺失及方向阶段禁用的页面均不会进入正式 Markdown，也不得被后续 Chunk 读取。
+
+题注的判定是：`accepted`（视觉对象和题注自身来源页均可信，且题注非明显乱码）、`garbled`、`page_untrusted` 或 `missing`。只有 `accepted` 题注进入 Markdown；其余题注的原始值不删除，继续写入审计产物。乱码判定采用高精度、保守策略，避免把正常工程符号误判为乱码。
+
+产物职责固定如下：
+
+| 产物 | 用途与保留内容 |
+| --- | --- |
+| `document.md` | 正式入库视图：可信正文/标题/列表及可信表注、图注，含原始页码标记。 |
+| `document.json` | 完整、未裁剪的 Docling 结果，保留视觉区域内部 OCR，供审计和未来多模态重处理。 |
+| `regions.json` | 每个表格/图片的 `region_id`、Docling 引用、原始页码、章节、bbox、原始题注与 `visual_body_in_semantic_markdown=false`、`caption_in_semantic_markdown`、`caption_trust_decision`。若题注不可用，使用“PDF 第 N 页未命名表格/图片 M”作为定位标签。 |
+| `quality_report.json` | 全部已处理页面的页面准入、方向、解析质量和运行配置；逐页只存聚合计数/分数和 OCR 路由证据，不复制页面图像、OCR 全文或每个 OCR 框，因此随页数线性、小记录增长。 |
+
+所有 ONNX 会话使用 CUDA-preferred mixed execution 策略；不使用强制 CPU EP 回退锁，因此 CUDA EP 不支持的辅助节点可由 CPU 执行。RapidOCR 不接收预构建 Python 会话，而由其正式配置入口创建内部会话；Docling 随后记录 `rapidocr_det_providers`、`rapidocr_cls_providers`、`rapidocr_rec_providers` 并验证首 Provider。profile 是部署验收、性能排查及模型或 ONNX Runtime 升级后的复验证据，不是每次正式预处理的门禁；正式任务仅要求用户所选 CUDA 已实际作为首个活跃 Provider，或用户显式选择 CPU-only。
+
+服务器验收至少包含真实模型四向页、NASA 第 38 页语义隔离、受审页面门禁及 PDF 向量文本保真检查；可直接执行的环境检查、命令、断言和回传清单见 [`pdf-preprocessing-server-acceptance.md`](pdf-preprocessing-server-acceptance.md)。
+
+### 已实现：数字版 PDF 表格的受控解析
+
+PDF 表格按每个 `TableItem` 的 bbox 独立路由，绝不以整份 PDF 的类型代替区域判断。页级文字单元的中心点落入表格区域后，按 `from_ocr` 统计字符数：仅原生字符为 `native`；仅 OCR 字符为 `ocr`；两者兼有为 `mixed`；没有文字为 `image_only`。V0.1 只尝试 `native`，其余种类由预留的 `OcrTableExtractor` 记录为 `deferred`，不伪造空表格，也不会丢失题注、页码、bbox 或章节定位。
+
+管线启用项目本地 TableFormer V1：`do_table_structure=True`、`mode=accurate`、`do_cell_matching=True`。禁止使用 TableFormer V2 作为默认实现。结构模型仅提出行列网格；每个输出单元格的文字都必须从原生 PDF 文字单元重新组装，不能采用、修正或补写模型文本。启动前要求本地目录 `models/docling-project--docling-models/model_artifacts/tableformer/accurate/` 至少包含固定 `v2.3.0` 的 `tm_config.json` 和 `tableformer_accurate.safetensors`；两者均按 `models/preprocessing-models.manifest.json` 的大小及 SHA-256 校验，缺失或不匹配时立即失败且绝不运行时下载。
+
+`NativePdfTableExtractor` 和预留的 `OcrTableExtractor` 输出同一 Canonical Table Schema。原生表只有同时满足以下条件才可 `accepted`：区域内 OCR 字符数为零；全部非空单元文字追溯到原生文字单元；一个文字单元恰好归属一个单元格；中心点只落在一个单元格 bbox；行列和 span 合法、逻辑网格无重叠；输出单元格只能按其 `source_cell_refs` 确定性重建；所有原生引用集合及数量均一一对应；已唯一分配的原生字符数/区域原生字符总数为 `1.0`。不得将按页面 y/x 排序的全文与按表格行列拼接的全文直接比较。Canonical JSON 保留真实 rowspan/colspan；Markdown 采用 `markdown_span_projection="anchor_only"`：span 的文字仅写在左上锚点、覆盖格为空。只有实际列标题之前的前导全宽标题可置于 pipe table 前；表体中的全宽分组行必须留在原行位置，不能改变相邻数据行顺序。
+
+每张表独立写入 `tables/<table_id>.json`，并由 `tables/index.json` 索引；`table_id` 固定包含文档、原始页号和页内序号，`continuation_group_id=null`，禁止 V0.1 自动合并跨页表。一个 `TableItem` 若有多个页面 provenance，只生成一个锚定首个 provenance 页的 `deferred` 审计记录，`cells=[]` 并记录全部 provenance 页码，禁止把共享 cells 复制成多个页面结果。`quality_report.json` 只保留 `table_summary` 计数，不含 cells。`regions.json` 的 table 记录增加 `source_kind`、`table_decision`、`table_artifact`、`table_id` 和 `canonical_table_in_semantic_markdown`；原始 `visual_body_in_semantic_markdown` 始终为 false。正式 `document.md` 仍只输出可信页面：序列化时在 accepted native `TableItem` 原树位置写入唯一临时占位符，再一对一替换为 `<!-- TABLE ... -->` 包围的完整 pipe-table 块；占位符缺失、重复或残留均立即失败。其他表格本体继续隔离，仅保留可信题注；所有图片本体仍隔离。
+
 ## 一、功能范围
 
 | 模块 | V0.1 是否实现 | 说明 |
@@ -84,8 +158,9 @@ V0.1 必须支持：
 | Word 输入 | 可选 | 调库实现即可 |
 | CAD/图纸解析 | 只留接口 | 不自行训练模型 |
 | 文档结构解析 | 必须 | 标题、章节、页码等 |
+| PDF 页面方向标准化 | 已实现 | Docling 前独立 PP-LCNet 阶段；复核通过后仅修改输出副本 `/Rotate` |
 | 扫描页 OCR | 必须 | 对缺失或低质量文字层进行识别 |
-| 表格内部解析 | 不做 | 单元格内容不进入检索和生成链路 |
+| 表格内部解析 | 受控实现 | 仅通过原生文字可追溯、几何和文字守恒校验的数字表格进入 Markdown；OCR/图片/混合及不可信结构仍不进入 |
 | 表格定位引用 | 必须 | 保留表注、章节、页码、来源、区域引用 |
 | 图片/图表语义理解 | 不做 | 不生成语义描述，不进入检索和生成链路 |
 | 图片/图表定位引用 | 必须 | 保留图注、章节、页码、来源、区域引用 |
