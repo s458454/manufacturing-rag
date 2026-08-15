@@ -549,10 +549,19 @@ for entry in matrix_records:
         )
     else:
         assert marker not in markdown
-assert accepted_matrix_pages == set(range(36, 49)), (
-    "every page from 36 through 48 must contain an accepted native table"
+assert accepted_matrix_pages == set(range(36, 47)) | {48}, (
+    "pages 36-46 and 48 must contain an accepted native table; "
+    "page 47 nested/ambiguous geometry remains fail-closed"
 )
-# Every matrix page must pass; the combined view must reveal the expected columns.
+# Page 47 is structurally invalid in V0.1 (nested/overlapping cells).
+assert 47 not in accepted_matrix_pages
+page47 = [entry for entry in matrix_records if entry.get("page_no") == 47]
+assert page47, "page 47 must still produce a native table artifact"
+for entry in page47:
+    nested = json.loads((artifact / entry["artifact"]).read_text(encoding="utf-8"))
+    assert nested["decision"] == "rejected", nested
+    assert f"<!-- TABLE id={nested['table_id']}" not in markdown
+# Required matrix pages must pass; the combined view must reveal the expected columns.
 matrix_markdown = "\n".join(
     block
     for page_no in sorted(visible_matrix_blocks_by_page)

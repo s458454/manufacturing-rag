@@ -21,15 +21,20 @@ from verify_pdf_preprocess_server import (
 from table_extraction import TableExtractionResult, table_to_markdown
 
 
-def _summary(*, accepted: int, deferred_image_only: int = 0) -> dict[str, int]:
+def _summary(
+    *,
+    accepted: int,
+    deferred_image_only: int = 0,
+    rejected_structure: int = 0,
+) -> dict[str, int]:
     return {
-        "detected": accepted + deferred_image_only,
+        "detected": accepted + deferred_image_only + rejected_structure,
         "accepted_native": accepted,
         "deferred_native": 0,
         "deferred_ocr": 0,
         "deferred_mixed": 0,
         "deferred_image_only": deferred_image_only,
-        "rejected_structure": 0,
+        "rejected_structure": rejected_structure,
     }
 
 
@@ -124,6 +129,31 @@ def _accepted_record(table_id: str, page_no: int) -> dict[str, object]:
     }
 
 
+def _rejected_record(table_id: str, page_no: int) -> dict[str, object]:
+    return {
+        "table_id": table_id,
+        "document_id": "golden",
+        "page_no": page_no,
+        "bbox": [0, 0, 1, 1],
+        "section_hierarchy": ["Requirements Compliance Matrix"],
+        "caption": None,
+        "docling_ref": f"#/tables/{page_no}",
+        "source_kind": "native",
+        "extractor": "native_pdf_table",
+        "decision": "rejected",
+        "row_count": 0,
+        "column_count": 0,
+        "cells": [],
+        "validation": {
+            "failure_reasons": [
+                "source_cell_geometry_is_unassigned_or_ambiguous"
+            ],
+        },
+        "footnotes": [],
+        "continuation_group_id": None,
+    }
+
+
 def _golden_fixture(tmp_path: Path) -> tuple[
     Path, dict[str, object], list[dict[str, object]], dict[str, object], str
 ]:
@@ -134,7 +164,11 @@ def _golden_fixture(tmp_path: Path) -> tuple[
     page_blocks: dict[int, list[str]] = {page_no: [] for page_no in range(1, 49)}
     for page_no in range(36, 49):
         table_id = f"golden-p{page_no:04d}-t001"
-        record = _accepted_record(table_id, page_no)
+        record = (
+            _rejected_record(table_id, page_no)
+            if page_no == 47
+            else _accepted_record(table_id, page_no)
+        )
         artifact = f"tables/{table_id}.json"
         (artifact_dir / artifact).write_text(
             json.dumps(record), encoding="utf-8"
@@ -145,10 +179,12 @@ def _golden_fixture(tmp_path: Path) -> tuple[
                 "page_no": page_no,
                 "source_kind": "native",
                 "extractor": "native_pdf_table",
-                "decision": "accepted",
+                "decision": record["decision"],
                 "artifact": artifact,
             }
         )
+        if page_no == 47:
+            continue
         rows = table_to_markdown(_result_from_record(record))
         page_blocks[page_no].append(
             f"<!-- TABLE id={table_id} page={page_no} source=native -->\n\n"
@@ -186,7 +222,7 @@ def _golden_fixture(tmp_path: Path) -> tuple[
     ]
     table_index: dict[str, object] = {
         "tables": entries,
-        "summary": _summary(accepted=13),
+        "summary": _summary(accepted=12, rejected_structure=1),
     }
     return artifact_dir, quality, regions, table_index, markdown
 
@@ -199,7 +235,11 @@ def test_5006a_golden_requires_all_pages_and_every_matrix_page(
     evidence = validate_5006a_golden_artifacts(*fixture)
 
     assert evidence["all_pages_trusted"] is True
-    assert evidence["matrix_pages_with_accepted_native_table"] == list(range(36, 49))
+    assert evidence["matrix_pages_with_accepted_native_table"] == [
+        *range(36, 47),
+        48,
+    ]
+    assert evidence["nested_or_ambiguous_matrix_pages_excluded"] == [47]
     assert evidence["page36_row_order"] == "2.4.2 < 4. Requirements < 4.1"
 
 
@@ -218,7 +258,7 @@ def test_5006a_golden_rejects_missing_matrix_page(tmp_path: Path) -> None:
     table_index["tables"] = [
         entry for entry in table_index["tables"] if entry["page_no"] != 48
     ]
-    table_index["summary"] = _summary(accepted=12)
+    table_index["summary"] = _summary(accepted=11, rejected_structure=1)
     markdown = re.sub(
         r"<!-- TABLE id=golden-p0048-t001 .*?<!-- /TABLE -->",
         "",
@@ -226,7 +266,45 @@ def test_5006a_golden_rejects_missing_matrix_page(tmp_path: Path) -> None:
         flags=re.S,
     )
 
-    with pytest.raises(RuntimeError, match="every matrix page"):
+    with pytest.raises(RuntimeError, match="required matrix page"):
+        validate_5006a_golden_artifacts(
+            artifact_dir, quality, regions, table_index, markdown
+        )
+
+
+def test_5006a_golden_rejects_admitted_nested_matrix_on_page_47(
+    tmp_path: Path,
+) -> None:
+    artifact_dir, quality, regions, table_index, markdown = _golden_fixture(tmp_path)
+    entry = next(item for item in table_index["tables"] if item["page_no"] == 47)
+    record = _accepted_record(entry["table_id"], 47)
+    (artifact_dir / entry["artifact"]).write_text(
+        json.dumps(record), encoding="utf-8"
+    )
+    entry["decision"] = "accepted"
+    table_index["summary"] = _summary(accepted=13)
+    rows = table_to_markdown(_result_from_record(record))
+    markdown = markdown.replace(
+        "<!-- PDF page 47 -->",
+        "<!-- PDF page 47 -->\n\n"
+        f"<!-- TABLE id={entry['table_id']} page=47 source=native -->\n\n"
+        f"{rows}\n\n<!-- /TABLE -->",
+    )
+
+    with pytest.raises(RuntimeError, match="must remain fail-closed"):
+        validate_5006a_golden_artifacts(
+            artifact_dir, quality, regions, table_index, markdown
+        )
+
+
+def test_5006a_golden_requires_page_47_rejected_artifact(tmp_path: Path) -> None:
+    artifact_dir, quality, regions, table_index, markdown = _golden_fixture(tmp_path)
+    table_index["tables"] = [
+        entry for entry in table_index["tables"] if entry["page_no"] != 47
+    ]
+    table_index["summary"] = _summary(accepted=12)
+
+    with pytest.raises(RuntimeError, match="native table artifact"):
         validate_5006a_golden_artifacts(
             artifact_dir, quality, regions, table_index, markdown
         )
@@ -312,7 +390,7 @@ def test_5006a_golden_rejects_page17_native_canonical_table(tmp_path: Path) -> N
             "artifact": artifact,
         }
     )
-    table_index["summary"] = _summary(accepted=14)
+    table_index["summary"] = _summary(accepted=13, rejected_structure=1)
     block = table_to_markdown(_result_from_record(record))
     markdown = markdown.replace(
         "<!-- PDF page 17 -->",
@@ -399,7 +477,9 @@ def test_5006a_golden_rejects_deferred_table_body_leak(tmp_path: Path) -> None:
             "artifact": artifact,
         }
     )
-    table_index["summary"] = _summary(accepted=13, deferred_image_only=1)
+    table_index["summary"] = _summary(
+        accepted=12, deferred_image_only=1, rejected_structure=1
+    )
     markdown += (
         f"\n\n<!-- TABLE id={table_id} page=10 source=native -->\n\n"
         "leaked\n\n<!-- /TABLE -->"

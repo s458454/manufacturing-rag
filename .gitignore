@@ -91,3 +91,8 @@ volumes/
 etcd_data/
 minio_data/
 milvus_data/
+
+# Local drafts that were split into docs/ and should not be uploaded
+all-in-one-master-complete.md
+agent_backup.md
+manufacturing-rag-docs-split-v1/

@@ -141,6 +141,20 @@ class BaseOcrModel(BasePageModel, BaseModelWithOptions):
             {
                 "route_requested": route,
                 "ocr_rectangle_count": len(selected_rects),
+                # Persist the exact rectangles this page actually sends to OCR
+                # (already TOPLEFT, see ``find_ocr_rects`` above) so downstream
+                # preprocessing can isolate visual-region OCR text from body
+                # text without recomputing a second, possibly divergent,
+                # rectangle set.
+                "ocr_rectangles": [
+                    {
+                        "l": float(rect.l),
+                        "t": float(rect.t),
+                        "r": float(rect.r),
+                        "b": float(rect.b),
+                    }
+                    for rect in selected_rects
+                ],
             }
         )
         return selected_rects

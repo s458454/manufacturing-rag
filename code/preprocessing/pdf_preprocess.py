@@ -699,6 +699,31 @@ def _item_page_numbers(item: Any) -> set[int]:
     }
 
 
+def _item_page_bboxes(item: Any) -> list[tuple[int, Any]]:
+    """Return every ``(page_no, raw bbox)`` pair from an item's provenance."""
+    result: list[tuple[int, Any]] = []
+    for prov in getattr(item, "prov", []) or []:
+        page_no = getattr(prov, "page_no", None)
+        bbox = getattr(prov, "bbox", None)
+        if isinstance(page_no, int) and page_no > 0 and bbox is not None:
+            result.append((page_no, bbox))
+    return result
+
+
+def _boxes_intersect(a: list[float], b: list[float]) -> bool:
+    """Positive-area overlap of two ``[left, top, right, bottom]`` boxes.
+
+    Both boxes must already be normalized TOPLEFT (``bbox_to_topleft`` output):
+    left <= right and top <= bottom.  Shared edges or corners do not count:
+    OCR rectangles are already dilated, so mere contact is not enough to
+    treat a rectangle as belonging to a Picture or deferred table.
+    """
+    return (
+        max(a[0], b[0]) < min(a[2], b[2])
+        and max(a[1], b[1]) < min(a[3], b[3])
+    )
+
+
 def _is_document_item(item: Any) -> bool:
     """Return whether an object bears page-level content provenance.
 
@@ -866,6 +891,11 @@ class SemanticProjection:
     visual_caption_trust: dict[str, str]
     accepted_table_ids: set[str]
     eligible_page_nos: set[int]
+    # Region-OCR visual isolation audit (Task 1).  Empty unless the caller
+    # supplied ``page_heights``, i.e. only the final, markdown-driving
+    # projection populates these.
+    visual_ocr_rectangles_by_page: dict[int, list[list[float]]]
+    visual_ocr_isolated_refs: set[str]
 
 
 def _caption_decision(
@@ -897,17 +927,35 @@ def build_semantic_projection(
     document: Any,
     pages: list[dict[str, Any]],
     table_results: dict[str, TableExtractionResult] | None = None,
+    page_heights: dict[int, float] | None = None,
 ) -> SemanticProjection:
-    """Create reference-level visual isolation and final page eligibility gate."""
+    """Create reference-level visual isolation and final page eligibility gate.
+
+    ``page_heights`` (PDF page_no -> page height) is only supplied by the
+    final, markdown-driving call once table routing is known.  When it is
+    ``None`` the region-OCR visual isolation added for Task 1 is a no-op and
+    behavior is identical to before that feature existed.
+    """
     eligible_page_nos = {
         int(page["page_no"])
         for page in pages
         if page.get("eligible_for_indexing") is True and isinstance(page.get("page_no"), int)
     }
+    results_by_docling_ref: dict[str, TableExtractionResult] = {
+        result.docling_ref: result
+        for result in (table_results or {}).values()
+        if isinstance(getattr(result, "docling_ref", None), str)
+    }
     visual_infos: list[dict[str, Any]] = []
     seen_visual_refs: set[str] = set()
     all_doc_items: list[Any] = []
     seen_item_refs: set[str] = set()
+    # Region-OCR visual isolation (Task 1): every Picture, and every
+    # non-native Table, contributes its per-page provenance boxes here so a
+    # region-OCR rectangle that geometrically touches one can be marked
+    # ``visual_ocr_rectangle`` below.  A native table never contributes; its
+    # empty logical cells are Task 2's independent responsibility.
+    visual_boxes_by_page: dict[int, list[list[float]]] = {}
 
     for item, _level in document.iterate_items(with_groups=True, traverse_pictures=True):
         item_ref = _ref_cref(item)
@@ -919,6 +967,21 @@ def build_semantic_projection(
         if item_ref in seen_visual_refs:
             continue
         seen_visual_refs.add(item_ref)
+        if page_heights is not None:
+            table_result_for_visual = (
+                results_by_docling_ref.get(item_ref) if isinstance(item, TableItem) else None
+            )
+            is_non_native_visual_source = isinstance(item, PictureItem) or (
+                table_result_for_visual is not None
+                and table_result_for_visual.source_kind != "native"
+            )
+            if is_non_native_visual_source:
+                for page_no, raw_bbox in _item_page_bboxes(item):
+                    if page_no not in page_heights:
+                        continue
+                    box = bbox_to_topleft(raw_bbox, page_heights[page_no])
+                    if box is not None:
+                        visual_boxes_by_page.setdefault(page_no, []).append(box)
         caption_refs: list[str] = []
         caption_values: dict[str, str] = {}
         caption_pages: dict[str, set[int]] = {}
@@ -986,10 +1049,82 @@ def build_semantic_projection(
         and result.page_no in eligible_page_nos
     }
 
+    # Region-OCR visual isolation (Task 1): mark every actual OCR rectangle of
+    # a region_ocr page that geometrically intersects a Picture or a
+    # non-native Table as a ``visual_ocr_rectangle``.  full_page_ocr and
+    # native_only pages never participate (Task 1.7/1.8).
+    visual_ocr_rectangles_by_page: dict[int, list[list[float]]] = {}
+    if page_heights is not None:
+        for page in pages:
+            page_no = page.get("page_no")
+            if not isinstance(page_no, int) or page.get("route_observed") != "region_ocr":
+                continue
+            page_visual_boxes = visual_boxes_by_page.get(page_no)
+            if not page_visual_boxes or page_no not in page_heights:
+                continue
+            route_evidence = page.get("ocr_route_evidence")
+            raw_rectangles = (
+                route_evidence.get("ocr_rectangles")
+                if isinstance(route_evidence, dict)
+                else None
+            )
+            if not raw_rectangles:
+                continue
+            page_height = page_heights[page_no]
+            marked_rectangles: list[list[float]] = []
+            for raw_rectangle in raw_rectangles:
+                rectangle_box = bbox_to_topleft(raw_rectangle, page_height)
+                if rectangle_box is None:
+                    continue
+                if any(
+                    _boxes_intersect(rectangle_box, visual_box)
+                    for visual_box in page_visual_boxes
+                ):
+                    marked_rectangles.append(rectangle_box)
+            if marked_rectangles:
+                visual_ocr_rectangles_by_page[page_no] = marked_rectangles
+
+    # A plain body TextItem whose bbox centre falls inside a
+    # ``visual_ocr_rectangle`` is visual body/overlay content, regardless of
+    # whether that particular text is itself OCR- or native-sourced (Task
+    # 1.6): the same rectangle can hold both.  Trusted captions are the only
+    # exception and are restored uniformly below, alongside every other
+    # visual-descendant exclusion.
+    visual_ocr_isolated_refs: set[str] = set()
+    if visual_ocr_rectangles_by_page:
+        for item in all_doc_items:
+            if not isinstance(item, TextItem):
+                continue
+            item_ref = _ref_cref(item)
+            if item_ref is None:
+                continue
+            for prov in getattr(item, "prov", []) or []:
+                page_no = getattr(prov, "page_no", None)
+                raw_bbox = getattr(prov, "bbox", None)
+                if not isinstance(page_no, int) or raw_bbox is None:
+                    continue
+                rectangles = visual_ocr_rectangles_by_page.get(page_no)
+                if not rectangles or page_no not in (page_heights or {}):
+                    continue
+                item_box = bbox_to_topleft(raw_bbox, page_heights[page_no])
+                if item_box is None:
+                    continue
+                center_x = (item_box[0] + item_box[2]) / 2.0
+                center_y = (item_box[1] + item_box[3]) / 2.0
+                if any(
+                    rectangle[0] <= center_x <= rectangle[2]
+                    and rectangle[1] <= center_y <= rectangle[3]
+                    for rectangle in rectangles
+                ):
+                    visual_ocr_isolated_refs.add(item_ref)
+                    break
+
     # Required formula for a visual region remains: root and descendants minus
     # explicit trusted captions. Accepted tables are injected from their
     # canonical audited representation, so their Docling body stays excluded.
-    excluded_refs = all_visual_descendants - accepted_caption_refs
+    # Region-OCR-isolated body text joins the same exclusion set and is
+    # subject to the identical trusted-caption exception (Task 1.5).
+    excluded_refs = (all_visual_descendants | visual_ocr_isolated_refs) - accepted_caption_refs
     for item in all_doc_items:
         item_ref = _ref_cref(item)
         if item_ref is None or not _is_document_item(item):
@@ -1014,6 +1149,8 @@ def build_semantic_projection(
         visual_caption_trust=visual_caption_trust,
         accepted_table_ids=accepted_table_ids,
         eligible_page_nos=eligible_page_nos,
+        visual_ocr_rectangles_by_page=visual_ocr_rectangles_by_page,
+        visual_ocr_isolated_refs=visual_ocr_isolated_refs,
     )
 
 
@@ -2150,6 +2287,16 @@ def run_preprocessing(
 
     print("preprocess_stage=quality_and_semantic_projection", flush=True)
     converted_errors = [json_error(error) for error in result.errors]
+    # Reuse the same page-height source ``extract_tables`` already trusts for
+    # BOTTOMLEFT/TOPLEFT normalization, so region-OCR visual isolation (Task 1)
+    # never needs a second, possibly divergent, geometry lookup.
+    page_heights: dict[int, float] = {
+        int(page.page_no): height
+        for page in result.pages
+        if isinstance(getattr(page, "page_no", None), int)
+        and (height := finite_number(getattr(getattr(page, "size", None), "height", None)))
+        is not None
+    }
     pages = merge_orientation_with_page_quality(page_quality_payload(result), orientation_result)
     # The post-Docling gate needs region counts. Build a provisional projection
     # only for those audit fields, then rebuild it after the gate so document.md
@@ -2179,6 +2326,7 @@ def run_preprocessing(
         result.document,
         pages,
         {result.table_id: result for result in table_results},
+        page_heights=page_heights,
     )
     regions = collect_regions(result.document, projection, table_results_by_ref)
     markdown = inject_accepted_tables_into_markdown(
@@ -2288,6 +2436,12 @@ def run_preprocessing(
             "eligible_pdf_pages": sorted(projection.eligible_page_nos),
             "excluded_docling_ref_count": len(projection.excluded_refs),
             "accepted_caption_ref_count": len(projection.accepted_caption_refs),
+            "visual_ocr_rectangle_count": sum(
+                len(rectangles)
+                for rectangles in projection.visual_ocr_rectangles_by_page.values()
+            ),
+            "visual_ocr_rectangle_pages": sorted(projection.visual_ocr_rectangles_by_page),
+            "visual_ocr_isolated_text_item_count": len(projection.visual_ocr_isolated_refs),
         },
         "trust_policy": {
             "formal_markdown": (

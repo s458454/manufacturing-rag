@@ -23,8 +23,7 @@ All-in-RAG 参考代码整理，作为后续制造业 RAG 重构的可追溯起�
 ├── code/                         # C1-C9 原始参考代码与依赖配置
 ├── data/engineering_docs/        # 制造业公开文档及可校验清单
 ├── docling/                      # Docling 2.115.0 源码快照
-├── docs/
-│   └── manufacturing-rag-v0.1-spec.md
+├── docs/                         # 稳定需求、模块文档、验收与 proceeding
 └── models/                       # 模型目录占位符，不提交模型权重
 ```
 
@@ -64,7 +63,7 @@ python code/preprocessing/pdf_preprocess.py `
   --overwrite
 ```
 
-`--page-range` 同时约束方向分类和 Docling，页码仍对应原 PDF。CUDA 模式下 PP-LCNet 与 RapidOCR Det/Cls/Rec 均采用 CUDA-preferred mixed execution：`CUDAExecutionProvider` 必须排在首位且实际激活，ONNX Runtime 可将不支持的少量节点交由 CPU；CUDA 不可用或会话整体退化为 CPU 时会明确失败。RapidOCR 会通过其可序列化配置入口自行建立内部会话，随后输出三个阶段的真实 Provider 列表。只有显式 `--device cpu` 才会创建 CPU-only 会话。完整语义投影、产物字段与验收口径见 [`docs/manufacturing-rag-v0.1-spec.md`](docs/manufacturing-rag-v0.1-spec.md)，服务器验收命令见 [`docs/pdf-preprocessing-server-acceptance.md`](docs/pdf-preprocessing-server-acceptance.md)。
+`--page-range` 同时约束方向分类和 Docling，页码仍对应原 PDF。CUDA 模式下 PP-LCNet 与 RapidOCR Det/Cls/Rec 均采用 CUDA-preferred mixed execution：`CUDAExecutionProvider` 必须排在首位且实际激活，ONNX Runtime 可将不支持的少量节点交由 CPU；CUDA 不可用或会话整体退化为 CPU 时会明确失败。RapidOCR 会通过其可序列化配置入口自行建立内部会话，随后输出三个阶段的真实 Provider 列表。只有显式 `--device cpu` 才会创建 CPU-only 会话。冻结后的语义投影、产物字段与验收口径见 [`docs/preprocessing.md`](docs/preprocessing.md)，服务器验收命令见 [`docs/Preprocessing/pdf-preprocessing-server-acceptance.md`](docs/Preprocessing/pdf-preprocessing-server-acceptance.md)。
 
 数字版表格使用项目本地、固定 `v2.3.0` 的 TableFormer V1 `accurate` 与 cell matching。原生文字必须一对一追溯并按 source cell 引用守恒；rowspan/colspan 及显式表头标记在 Canonical JSON 中保留，Markdown 则以左上锚点保留文字、覆盖格置空。标题和多级分组表头按原顺序位于 pipe table 前，表体分组行保持原行序；没有可信显式表头时使用空 Markdown 表头，不把首行数据臆造为表头。Accepted 表格通过 `TableItem` 原位置占位符一对一替换，可信关联脚注紧随表格保留；多页 provenance 的单个 TableItem 在 V0.1 统一降级为一个 `deferred` 审计记录，绝不复制 cells。OCR、混合、无文字及不可信结构表仍仅保留题注和审计信息。`models/docling-project--docling-models/model_artifacts/tableformer/accurate/` 的 `tm_config.json` 和 `tableformer_accurate.safetensors` 均按大小及 SHA-256 完整性清单校验，缺失或不一致时程序 fail-fast，禁止运行时下载。
 

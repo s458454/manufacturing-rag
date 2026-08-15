@@ -68,6 +68,19 @@ def _contains(box: list[float], x: float, y: float) -> bool:
     return box[0] <= x <= box[2] and box[1] <= y <= box[3]
 
 
+def _union_aabb(boxes: list[list[float]]) -> list[float] | None:
+    """Axis-aligned envelope of structural cell boxes. Empty input yields None."""
+
+    if not boxes:
+        return None
+    return [
+        min(box[0] for box in boxes),
+        min(box[1] for box in boxes),
+        max(box[2] for box in boxes),
+        max(box[3] for box in boxes),
+    ]
+
+
 def _int(value: Any) -> int | None:
     try:
         integer = int(value)
@@ -376,35 +389,54 @@ class NativePdfTableExtractor:
 
         # A Markdown grid cannot safely imply cells which TableFormer did not
         # emit.  Empty *text* cells are fine, but every logical coordinate has
-        # to be represented by exactly one proposed structural cell.
+        # to be represented either by a real structural cell or, once every
+        # real native source cell is safely and uniquely accounted for below,
+        # by a synthetic empty cell backed by independent row/column
+        # structural evidence (see the provably-empty handling further down).
         expected_coordinates = {
             (row, column)
             for row in range(row_count)
             for column in range(column_count)
         }
         missing_coordinates = expected_coordinates - occupied
-        if missing_coordinates:
-            validation["failure_reasons"] = [
-                "logical_grid_has_uncovered_coordinates"
-            ]
-            validation["uncovered_logical_coordinates"] = [
-                {"row": row, "column": column}
-                for row, column in sorted(missing_coordinates)
-            ]
-            validation["candidate_cell_count"] = len(candidates)
-            return self._result(
-                table_region,
-                source_kind,
-                validation,
-                decision="rejected",
-                row_count=row_count,
-                column_count=column_count,
-            )
+        validation["candidate_cell_count"] = len(candidates)
 
+        # The TableItem envelope can inflate past the real grid and swallow
+        # page furniture (running headers, footers).  Table text is defined by
+        # TableFormer cell boxes, not that envelope: a source whose centre
+        # sits outside the structural-cell AABB is contamination and is
+        # dropped.  A source inside the AABB that still has 0 or >1 cell
+        # owners remains fail-closed.
+        grid_bbox = _union_aabb([candidate["bbox"] for candidate in candidates])
+        validation["structural_grid_bbox"] = grid_bbox
+        excluded_outside_grid: list[SourceTextCell] = []
+        in_grid_sources: list[SourceTextCell] = []
         for source in source_cells:
             center_x, center_y = _center(source.bbox)
-            owners = [candidate for candidate in candidates if _contains(candidate["bbox"], center_x, center_y)]
-            if len(owners) != 1:
+            owners = [
+                candidate
+                for candidate in candidates
+                if _contains(candidate["bbox"], center_x, center_y)
+            ]
+            if len(owners) > 1:
+                validation["failure_reasons"] = [
+                    "source_cell_geometry_is_unassigned_or_ambiguous"
+                ]
+                validation["geometry_problem_source_refs"] = [source.source_ref]
+                return self._result(
+                    table_region,
+                    source_kind,
+                    validation,
+                    decision="rejected",
+                    row_count=row_count,
+                    column_count=column_count,
+                )
+            if not owners:
+                if grid_bbox is not None and not _contains(
+                    grid_bbox, center_x, center_y
+                ):
+                    excluded_outside_grid.append(source)
+                    continue
                 validation["failure_reasons"] = [
                     "source_cell_geometry_is_unassigned_or_ambiguous"
                 ]
@@ -418,6 +450,40 @@ class NativePdfTableExtractor:
                     column_count=column_count,
                 )
             owners[0]["sources"].append(source)
+            in_grid_sources.append(source)
+
+        validation["harvested_source_cell_count"] = len(source_cells)
+        validation["excluded_outside_grid_source_cell_count"] = len(
+            excluded_outside_grid
+        )
+        validation["excluded_outside_grid_source_cells"] = [
+            {
+                "source_cell_ref": cell.source_ref,
+                "text": cell.text,
+                "bbox": cell.bbox,
+                "from_ocr": cell.from_ocr,
+            }
+            for cell in excluded_outside_grid
+        ]
+        source_cells = in_grid_sources
+        native_chars = sum(len(cell.text) for cell in source_cells if not cell.from_ocr)
+        ocr_chars = sum(len(cell.text) for cell in source_cells if cell.from_ocr)
+        validation["native_character_count"] = native_chars
+        validation["ocr_character_count"] = ocr_chars
+        validation["source_text_cell_count"] = len(source_cells)
+        validation["native_source_cell_count"] = sum(
+            not cell.from_ocr for cell in source_cells
+        )
+        validation["ocr_source_cell_count"] = sum(cell.from_ocr for cell in source_cells)
+        validation["source_cells"] = [
+            {
+                "source_cell_ref": cell.source_ref,
+                "text": cell.text,
+                "bbox": cell.bbox,
+                "from_ocr": cell.from_ocr,
+            }
+            for cell in source_cells
+        ]
 
         output_cells: list[dict[str, Any]] = []
         assigned_source_refs: list[str] = []
@@ -441,6 +507,7 @@ class NativePdfTableExtractor:
                     "text": text,
                     "source_cell_refs": [source.source_ref for source in sources],
                     "bbox": candidate["bbox"],
+                    "inferred_empty": False,
                 }
             )
 
@@ -483,7 +550,6 @@ class NativePdfTableExtractor:
         )
         validation.update(
             {
-                "candidate_cell_count": len(candidates),
                 "assigned_native_source_cell_count": len(assigned_source_refs),
                 "unique_assigned_native_source_cell_count": len(assigned_ref_set),
                 "source_cell_refs_match": assigned_ref_set == source_ref_set,
@@ -528,6 +594,86 @@ class NativePdfTableExtractor:
                 column_count=column_count,
             )
 
+        # Every real native source cell now has exactly one structural owner
+        # and is deterministically, fully conserved.  Only now is it safe to
+        # ask whether a logical hole TableFormer left uncovered is a
+        # legitimate blank cell: inventing an empty cell before this point
+        # could silently swallow real content that TableFormer failed to
+        # detect at all (it would instead fail conservation above).
+        if missing_coordinates:
+            validation["uncovered_logical_coordinates"] = [
+                {"row": row, "column": column}
+                for row, column in sorted(missing_coordinates)
+            ]
+            row_spans = [
+                (candidate["row_start"], candidate["row_start"] + candidate["row_span"])
+                for candidate in candidates
+            ]
+            column_spans = [
+                (
+                    candidate["column_start"],
+                    candidate["column_start"] + candidate["column_span"],
+                )
+                for candidate in candidates
+            ]
+            provably_empty: list[tuple[int, int]] = []
+            unexplained: list[tuple[int, int]] = []
+            for row, column in sorted(missing_coordinates):
+                has_row_evidence = any(
+                    row_start <= row < row_end for row_start, row_end in row_spans
+                )
+                has_column_evidence = any(
+                    column_start <= column < column_end
+                    for column_start, column_end in column_spans
+                )
+                if has_row_evidence and has_column_evidence:
+                    provably_empty.append((row, column))
+                else:
+                    unexplained.append((row, column))
+            validation["provably_empty_logical_coordinates"] = [
+                {"row": row, "column": column} for row, column in provably_empty
+            ]
+            validation["unexplained_logical_coordinates"] = [
+                {"row": row, "column": column} for row, column in unexplained
+            ]
+            if unexplained:
+                validation["failure_reasons"] = [
+                    "logical_grid_has_uncovered_coordinates"
+                ]
+                return self._result(
+                    table_region,
+                    source_kind,
+                    validation,
+                    decision="rejected",
+                    row_count=row_count,
+                    column_count=column_count,
+                )
+            # Every uncovered coordinate is provably empty: TableFormer
+            # structurally accounted for its row and its column elsewhere,
+            # it simply never emitted a cell for this intersection because
+            # the source PDF has no content there.  A synthetic cell never
+            # joins ``candidates``, never owns a source cell, and never gets
+            # a bbox: it exists only to complete the Markdown grid.
+            for row, column in provably_empty:
+                output_cells.append(
+                    {
+                        "row_start": row,
+                        "row_span": 1,
+                        "column_start": column,
+                        "column_span": 1,
+                        "column_header": False,
+                        "row_header": False,
+                        "text": "",
+                        "source_cell_refs": [],
+                        "bbox": None,
+                        "inferred_empty": True,
+                    }
+                )
+        else:
+            validation["uncovered_logical_coordinates"] = []
+            validation["provably_empty_logical_coordinates"] = []
+            validation["unexplained_logical_coordinates"] = []
+
         validation["failure_reasons"] = []
         return self._result(
             table_region,
@@ -536,7 +682,10 @@ class NativePdfTableExtractor:
             decision="accepted",
             row_count=row_count,
             column_count=column_count,
-            cells=output_cells,
+            cells=sorted(
+                output_cells,
+                key=lambda cell: (cell["row_start"], cell["column_start"]),
+            ),
         )
 
 
@@ -595,13 +744,25 @@ def table_to_markdown(result: TableExtractionResult) -> str:
     all_rows = list(range(result.row_count))
 
     def is_explicit_complete_header(row: int) -> bool:
-        """Require TableFormer's explicit flag across the full logical row."""
+        """Require TableFormer's explicit flag across the full logical row.
 
-        return all(
-            owners[row][column] is not None
-            and owners[row][column].get("column_header") is True
-            for column in range(result.column_count)
-        )
+        A synthetic ``inferred_empty`` cell is neutral: it never blocks header
+        completeness by itself, but it can never manufacture a header either.
+        At least one real, non-synthetic ``column_header=True`` cell must
+        still anchor the row.
+        """
+
+        has_real_header_cell = False
+        for column in range(result.column_count):
+            owner = owners[row][column]
+            if owner is None:
+                return False
+            if owner.get("inferred_empty"):
+                continue
+            if owner.get("column_header") is not True:
+                return False
+            has_real_header_cell = True
+        return has_real_header_cell
 
     def is_structural_preamble(row: int) -> bool:
         anchors = list({

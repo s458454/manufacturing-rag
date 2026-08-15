@@ -134,6 +134,74 @@ def test_native_table_rejects_ambiguous_source_cell_geometry() -> None:
     ]
 
 
+def test_native_table_excludes_source_outside_structural_grid_aabb() -> None:
+    """Furniture in the TableItem envelope but outside the cell AABB is dropped.
+
+    Geometry only: no header/footer keywords.  The conservation universe is the
+    remaining in-grid native sources, so dropping the furniture must still
+    yield ratio 1.0.
+    """
+
+    region = _region(
+        _table_cell(0, 0, _Box(0, 20, 50, 50)),
+        _table_cell(0, 1, _Box(50, 20, 100, 50)),
+        _table_cell(1, 0, _Box(0, 50, 50, 80)),
+        _table_cell(1, 1, _Box(50, 50, 100, 80)),
+    )
+    page = _page(
+        _source("RUNNING HEADER", _Box(20, 2, 80, 12), index=1),
+        _source("Section", _Box(1, 25, 40, 40), index=2),
+        _source("Requirement", _Box(55, 25, 90, 40), index=3),
+        _source("A", _Box(1, 55, 20, 75), index=4),
+        _source("Required", _Box(55, 55, 95, 75), index=5),
+        _source("PAGE FOOTER", _Box(20, 88, 80, 98), index=6),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "accepted"
+    assert result.validation["text_conservation_ratio"] == 1.0
+    assert result.validation["structural_grid_bbox"] == [0.0, 20.0, 100.0, 80.0]
+    assert result.validation["harvested_source_cell_count"] == 6
+    assert result.validation["excluded_outside_grid_source_cell_count"] == 2
+    excluded_texts = [
+        cell["text"]
+        for cell in result.validation["excluded_outside_grid_source_cells"]
+    ]
+    assert excluded_texts == ["RUNNING HEADER", "PAGE FOOTER"]
+    source_texts = [cell["text"] for cell in result.validation["source_cells"]]
+    assert source_texts == ["Section", "Requirement", "A", "Required"]
+    markdown = table_to_markdown(result)
+    assert "RUNNING HEADER" not in markdown
+    assert "PAGE FOOTER" not in markdown
+    assert "| Section | Requirement |" in markdown
+    assert "| A | Required |" in markdown
+
+
+def test_native_table_still_rejects_unassigned_source_inside_structural_grid_aabb() -> None:
+    region = _region(
+        _table_cell(0, 0, _Box(0, 20, 50, 40)),
+        _table_cell(0, 1, _Box(50, 20, 100, 40)),
+        _table_cell(1, 0, _Box(0, 60, 50, 80)),
+        _table_cell(1, 1, _Box(50, 60, 100, 80)),
+    )
+    page = _page(
+        _source("Section", _Box(1, 22, 40, 38), index=1),
+        _source("Requirement", _Box(55, 22, 90, 38), index=2),
+        _source("ORPHAN IN GAP", _Box(10, 45, 40, 55), index=3),
+        _source("A", _Box(1, 62, 20, 78), index=4),
+        _source("Required", _Box(55, 62, 95, 78), index=5),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "rejected"
+    assert result.validation["failure_reasons"] == [
+        "source_cell_geometry_is_unassigned_or_ambiguous"
+    ]
+    assert result.validation["geometry_problem_source_refs"] == ["page/1/cells/2"]
+
+
 def test_native_table_accepts_spans_and_projects_title_anchor_only() -> None:
     region = _region(
         _table_cell(0, 0, _Box(0, 0, 90, 30), col_span=3, column_header=False),
@@ -313,6 +381,173 @@ def test_native_table_accepts_docling_bottom_left_table_bboxes() -> None:
 
     assert result.decision == "accepted"
     assert result.cells[0]["text"] == "Section"
+
+
+def test_native_table_infers_provably_empty_cell_with_row_and_column_evidence() -> None:
+    region = _region(
+        _table_cell(0, 0, _Box(0, 0, 50, 50), column_header=True),
+        _table_cell(0, 1, _Box(50, 0, 100, 50), column_header=True),
+        _table_cell(1, 0, _Box(0, 50, 50, 100), column_header=False),
+        # (1, 1) is never emitted by TableFormer: the source PDF's cell for
+        # this data row/column intersection is genuinely blank.
+    )
+    page = _page(
+        _source("Name", _Box(1, 1, 40, 20), index=1),
+        _source("Status", _Box(55, 1, 90, 20), index=2),
+        _source("Alice", _Box(1, 55, 40, 75), index=3),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "accepted"
+    assert result.validation["text_conservation_ratio"] == 1.0
+    assert result.validation["uncovered_logical_coordinates"] == [
+        {"row": 1, "column": 1}
+    ]
+    assert result.validation["provably_empty_logical_coordinates"] == [
+        {"row": 1, "column": 1}
+    ]
+    assert result.validation["unexplained_logical_coordinates"] == []
+    inferred = [cell for cell in result.cells if cell.get("inferred_empty")]
+    assert len(inferred) == 1
+    assert inferred[0] == {
+        "row_start": 1,
+        "row_span": 1,
+        "column_start": 1,
+        "column_span": 1,
+        "column_header": False,
+        "row_header": False,
+        "text": "",
+        "source_cell_refs": [],
+        "bbox": None,
+        "inferred_empty": True,
+    }
+    markdown = table_to_markdown(result)
+    assert "| Name | Status |" in markdown
+    assert "| Alice |  |" in markdown
+
+
+def test_native_table_infers_multiple_provably_empty_cells_across_rows() -> None:
+    """Mirrors the Requirements Compliance Matrix pattern: blank fill-in columns."""
+
+    region = _region(
+        _table_cell(0, 0, _Box(0, 0, 30, 20), column_header=True),
+        _table_cell(0, 1, _Box(30, 0, 65, 20), column_header=True),
+        _table_cell(0, 2, _Box(65, 0, 100, 20), column_header=True),
+        _table_cell(1, 0, _Box(0, 20, 30, 60), column_header=False),
+        _table_cell(1, 1, _Box(30, 20, 65, 60), column_header=False),
+        _table_cell(2, 0, _Box(0, 60, 30, 100), column_header=False),
+        _table_cell(2, 1, _Box(30, 60, 65, 100), column_header=False),
+        rows=3,
+        columns=3,
+    )
+    page = _page(
+        _source("Section", _Box(1, 1, 25, 15), index=1),
+        _source("Applicable", _Box(31, 1, 60, 15), index=2),
+        _source("Comments", _Box(66, 1, 95, 15), index=3),
+        _source("2.4.2", _Box(1, 25, 25, 55), index=4),
+        _source("Tailoring", _Box(31, 25, 60, 55), index=5),
+        _source("2.4.3", _Box(1, 65, 25, 95), index=6),
+        _source("Order of Precedence", _Box(31, 65, 60, 95), index=7),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "accepted"
+    assert result.validation["unexplained_logical_coordinates"] == []
+    assert result.validation["provably_empty_logical_coordinates"] == [
+        {"row": 1, "column": 2},
+        {"row": 2, "column": 2},
+    ]
+    inferred_coordinates = sorted(
+        (cell["row_start"], cell["column_start"])
+        for cell in result.cells
+        if cell.get("inferred_empty")
+    )
+    assert inferred_coordinates == [(1, 2), (2, 2)]
+    markdown = table_to_markdown(result)
+    assert "| Section | Applicable | Comments |" in markdown
+    assert "| 2.4.2 | Tailoring |  |" in markdown
+    assert "| 2.4.3 | Order of Precedence |  |" in markdown
+
+
+def test_native_table_rejects_when_any_missing_coordinate_is_unexplained() -> None:
+    region = _region(
+        _table_cell(0, 0, _Box(0, 0, 50, 50), column_header=True),
+        _table_cell(1, 0, _Box(0, 50, 50, 100), column_header=False),
+        # Column 1 never appears anywhere: TableFormer never proposed any
+        # structural cell spanning it, so it cannot be proven empty.
+        rows=2,
+        columns=2,
+    )
+    page = _page(
+        _source("Name", _Box(1, 1, 40, 20), index=1),
+        _source("Alice", _Box(1, 55, 40, 75), index=2),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "rejected"
+    assert result.validation["failure_reasons"] == [
+        "logical_grid_has_uncovered_coordinates"
+    ]
+    assert result.validation["unexplained_logical_coordinates"] == [
+        {"row": 0, "column": 1},
+        {"row": 1, "column": 1},
+    ]
+    assert result.validation["provably_empty_logical_coordinates"] == []
+
+
+def test_ambiguous_source_cell_rejection_takes_priority_over_empty_cell_inference() -> None:
+    """A real, unassignable source cell must fail closed before any inference runs."""
+
+    region = _region(
+        _table_cell(0, 0, _Box(0, 0, 60, 60), column_header=True),
+        _table_cell(0, 1, _Box(40, 0, 100, 60), column_header=True),
+        rows=1,
+        columns=2,
+    )
+    page = _page(_source("Ambiguous", _Box(45, 10, 55, 20), index=1))
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "rejected"
+    assert result.validation["failure_reasons"] == [
+        "source_cell_geometry_is_unassigned_or_ambiguous"
+    ]
+    assert "provably_empty_logical_coordinates" not in result.validation
+    assert "unexplained_logical_coordinates" not in result.validation
+
+
+def test_synthetic_empty_cell_in_header_row_is_neutral_but_needs_a_real_header_cell() -> None:
+    region = _region(
+        _table_cell(0, 0, _Box(0, 0, 30, 20), column_header=True),
+        _table_cell(0, 2, _Box(65, 0, 100, 20), column_header=True),
+        # (0, 1) header cell is missing; TableFormer only ever placed a real
+        # candidate in that column on the data row below.
+        _table_cell(1, 0, _Box(0, 20, 30, 60), column_header=False),
+        _table_cell(1, 1, _Box(30, 20, 65, 60), column_header=False),
+        _table_cell(1, 2, _Box(65, 20, 100, 60), column_header=False),
+        rows=2,
+        columns=3,
+    )
+    page = _page(
+        _source("Section", _Box(1, 1, 25, 15), index=1),
+        _source("Comments", _Box(66, 1, 95, 15), index=2),
+        _source("2.4.2", _Box(1, 25, 25, 55), index=3),
+        _source("N/A", _Box(31, 25, 60, 55), index=4),
+        _source("Tailoring", _Box(66, 25, 95, 55), index=5),
+    )
+
+    result = NativePdfTableExtractor().extract(region, page, object())
+
+    assert result.decision == "accepted"
+    assert result.validation["provably_empty_logical_coordinates"] == [
+        {"row": 0, "column": 1}
+    ]
+    markdown = table_to_markdown(result)
+    assert "| Section |  | Comments |" in markdown
+    assert "| 2.4.2 | N/A | Tailoring |" in markdown
 
 
 def test_table_summary_never_contains_cells() -> None:

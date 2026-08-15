@@ -30,9 +30,9 @@ class _FakeRef:
 
 
 class _FakeProv:
-    def __init__(self, page_no: int) -> None:
+    def __init__(self, page_no: int, bbox: Any = None) -> None:
         self.page_no = page_no
-        self.bbox = None
+        self.bbox = bbox
 
 
 class _FakeNode:
@@ -907,3 +907,236 @@ def test_output_transaction_preserves_previous_good_run_on_rejected_replacement(
     assert (final / "document.md").read_text(encoding="utf-8") == "previous-good"
     assert (failure / "document.md").read_text(encoding="utf-8") == "rejected"
     assert not transaction.lock_path.exists()
+
+
+def _region_ocr_page(rectangles: list[dict[str, float]]) -> dict[str, object]:
+    return {
+        "page_no": 1,
+        "eligible_for_indexing": True,
+        "route_observed": "region_ocr",
+        "ocr_route_evidence": {"ocr_rectangles": rectangles},
+    }
+
+
+def test_region_ocr_rectangle_isolates_stray_visual_text_but_keeps_trusted_caption(
+    monkeypatch: Any,
+) -> None:
+    """Reproduces the NASA-STD-5006A Figure 4 leak: OCR text in the gap
+    between detected Picture boxes must not reach document.md, while the
+    trusted caption is kept even though its own bbox also falls inside the
+    same region-OCR rectangle (Task 1.5)."""
+
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/pictures/0": _FakePicture(
+                "#/pictures/0", page_no=1, captions=["#/texts/0"], children=["#/texts/0"]
+            ),
+            "#/texts/0": _FakeText("#/texts/0", page_no=1, text="Figure 4-Fillet Welds"),
+            "#/texts/1": _FakeText(
+                "#/texts/1", page_no=1, text="Notes: Root of Joint leaked OCR text"
+            ),
+            "#/texts/2": _FakeText("#/texts/2", page_no=1, text="Normal chapter body text"),
+        }
+    )
+    document.items["#/pictures/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 80})
+    ]
+    # The caption's own bbox happens to sit inside the same rectangle as the
+    # picture it describes; the trusted-caption exception must still apply.
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 10, "t": 65, "r": 90, "b": 78})
+    ]
+    document.items["#/texts/1"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 20, "r": 80, "b": 60})
+    ]
+    document.items["#/texts/2"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 150, "r": 80, "b": 170})
+    ]
+    pages = [_region_ocr_page([{"l": 0, "t": 0, "r": 100, "b": 80}])]
+
+    projection = module.build_semantic_projection(
+        document, pages, page_heights={1: 200.0}
+    )
+
+    assert 1 in projection.visual_ocr_rectangles_by_page
+    assert "#/texts/1" in projection.visual_ocr_isolated_refs
+    assert "#/texts/0" in projection.visual_ocr_isolated_refs
+    assert "#/texts/1" in projection.excluded_refs
+    assert "#/texts/0" not in projection.excluded_refs
+    assert "#/texts/2" not in projection.excluded_refs
+
+
+def test_full_page_ocr_route_never_applies_visual_ocr_isolation(monkeypatch: Any) -> None:
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/pictures/0": _FakePicture(
+                "#/pictures/0", page_no=1, captions=[], children=[]
+            ),
+            "#/texts/0": _FakeText("#/texts/0", page_no=1, text="Whole page OCR body text"),
+        }
+    )
+    document.items["#/pictures/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 100})
+    ]
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 10, "t": 10, "r": 90, "b": 90})
+    ]
+    pages = [
+        {
+            "page_no": 1,
+            "eligible_for_indexing": True,
+            "route_observed": "full_page_ocr",
+            "ocr_route_evidence": {
+                "ocr_rectangles": [{"l": 0, "t": 0, "r": 100, "b": 100}]
+            },
+        }
+    ]
+
+    projection = module.build_semantic_projection(
+        document, pages, page_heights={1: 200.0}
+    )
+
+    assert projection.visual_ocr_rectangles_by_page == {}
+    assert "#/texts/0" not in projection.excluded_refs
+
+
+def test_native_only_route_never_applies_visual_ocr_isolation(monkeypatch: Any) -> None:
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/pictures/0": _FakePicture(
+                "#/pictures/0", page_no=1, captions=[], children=[]
+            ),
+            "#/texts/0": _FakeText("#/texts/0", page_no=1, text="Body text near a picture"),
+        }
+    )
+    document.items["#/pictures/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 80})
+    ]
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 20, "r": 80, "b": 60})
+    ]
+    # Contrived: a native_only page should never carry OCR rectangles in
+    # practice, but the isolation must be gated on route, not just presence.
+    pages = [
+        {
+            "page_no": 1,
+            "eligible_for_indexing": True,
+            "route_observed": "native_only",
+            "ocr_route_evidence": {
+                "ocr_rectangles": [{"l": 0, "t": 0, "r": 100, "b": 80}]
+            },
+        }
+    ]
+
+    projection = module.build_semantic_projection(
+        document, pages, page_heights={1: 200.0}
+    )
+
+    assert projection.visual_ocr_rectangles_by_page == {}
+    assert "#/texts/0" not in projection.excluded_refs
+
+
+def test_native_table_does_not_contribute_to_visual_ocr_rectangle_marking(
+    monkeypatch: Any,
+) -> None:
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/tables/0": _FakeTable("#/tables/0", page_no=1, captions=[], children=[]),
+            "#/texts/0": _FakeText(
+                "#/texts/0", page_no=1, text="Body text near a native table"
+            ),
+        }
+    )
+    document.items["#/tables/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 80})
+    ]
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 20, "r": 80, "b": 60})
+    ]
+    accepted_native = module.TableExtractionResult(
+        table_id="doc-p0001-t001", document_id="doc", page_no=1, bbox=[0, 0, 100, 80],
+        section_hierarchy=[], caption=None, docling_ref="#/tables/0", source_kind="native",
+        extractor="native_pdf_table", decision="accepted", row_count=1, column_count=1,
+        cells=[], validation={},
+    )
+    pages = [_region_ocr_page([{"l": 0, "t": 0, "r": 100, "b": 80}])]
+
+    projection = module.build_semantic_projection(
+        document,
+        pages,
+        {accepted_native.table_id: accepted_native},
+        page_heights={1: 200.0},
+    )
+
+    assert projection.visual_ocr_rectangles_by_page == {}
+    assert "#/texts/0" not in projection.excluded_refs
+
+
+def test_non_native_table_contributes_to_visual_ocr_rectangle_marking(
+    monkeypatch: Any,
+) -> None:
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/tables/0": _FakeTable("#/tables/0", page_no=1, captions=[], children=[]),
+            "#/texts/0": _FakeText(
+                "#/texts/0", page_no=1, text="Stray OCR text inside a scanned table"
+            ),
+        }
+    )
+    document.items["#/tables/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 80})
+    ]
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 20, "r": 80, "b": 60})
+    ]
+    deferred = module.TableExtractionResult(
+        table_id="doc-p0001-t001", document_id="doc", page_no=1, bbox=[0, 0, 100, 80],
+        section_hierarchy=[], caption=None, docling_ref="#/tables/0", source_kind="ocr",
+        extractor="ocr_table", decision="deferred", row_count=0, column_count=0,
+        cells=[], validation={},
+    )
+    pages = [_region_ocr_page([{"l": 0, "t": 0, "r": 100, "b": 80}])]
+
+    projection = module.build_semantic_projection(
+        document,
+        pages,
+        {deferred.table_id: deferred},
+        page_heights={1: 200.0},
+    )
+
+    assert 1 in projection.visual_ocr_rectangles_by_page
+    assert "#/texts/0" in projection.excluded_refs
+
+
+def test_visual_ocr_isolation_is_a_no_op_without_page_heights(monkeypatch: Any) -> None:
+    """Callers that never pass ``page_heights`` (the pre-table-routing
+    provisional projections) must see byte-identical behavior to before
+    Task 1 existed."""
+
+    module = _load_module(monkeypatch)
+    document = _FakeDocument(
+        {
+            "#/pictures/0": _FakePicture(
+                "#/pictures/0", page_no=1, captions=[], children=[]
+            ),
+            "#/texts/0": _FakeText("#/texts/0", page_no=1, text="Stray text"),
+        }
+    )
+    document.items["#/pictures/0"].prov = [
+        _FakeProv(1, bbox={"l": 0, "t": 0, "r": 100, "b": 80})
+    ]
+    document.items["#/texts/0"].prov = [
+        _FakeProv(1, bbox={"l": 20, "t": 20, "r": 80, "b": 60})
+    ]
+    pages = [_region_ocr_page([{"l": 0, "t": 0, "r": 100, "b": 80}])]
+
+    projection = module.build_semantic_projection(document, pages)
+
+    assert projection.visual_ocr_rectangles_by_page == {}
+    assert projection.visual_ocr_isolated_refs == set()
+    assert "#/texts/0" not in projection.excluded_refs

@@ -40,6 +40,15 @@ from table_extraction import (  # noqa: E402 - local path is established above
 
 GOLDEN_5006A_SHA256 = "fa229965758a0f0c630034084173341e2a0053a1ca25d35a15b6d14e9b8e5c20"
 GOLDEN_5006A_PAGE_COUNT = 48
+GOLDEN_5006A_MATRIX_PAGE_NOS = tuple(range(36, 49))
+# Nested / overlapping TableFormer geometry is structurally invalid in V0.1.
+# Page 47 must remain fail-closed; it is not a required accepted matrix page.
+GOLDEN_5006A_NESTED_MATRIX_PAGE_NOS = frozenset({47})
+GOLDEN_5006A_REQUIRED_MATRIX_PAGE_NOS = tuple(
+    page_no
+    for page_no in GOLDEN_5006A_MATRIX_PAGE_NOS
+    if page_no not in GOLDEN_5006A_NESTED_MATRIX_PAGE_NOS
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -641,7 +650,7 @@ def validate_5006a_golden_artifacts(
         page_no = entry.get("page_no")
         if (
             isinstance(page_no, int)
-            and 36 <= page_no <= 48
+            and page_no in GOLDEN_5006A_MATRIX_PAGE_NOS
             and entry.get("decision") == "accepted"
             and entry.get("source_kind") == "native"
         ):
@@ -650,14 +659,43 @@ def validate_5006a_golden_artifacts(
             if all(token in normalized_block for token in matrix_tokens):
                 accepted_matrix_by_page.setdefault(page_no, []).append(entry)
     missing_matrix_pages = [
-        page_no for page_no in range(36, 49) if page_no not in accepted_matrix_by_page
+        page_no
+        for page_no in GOLDEN_5006A_REQUIRED_MATRIX_PAGE_NOS
+        if page_no not in accepted_matrix_by_page
     ]
     if missing_matrix_pages:
         raise RuntimeError(
             "5006A requires its identified requirements matrix (Section, Description, "
-            "Requirement in this Standard, GWR) on every matrix page: "
+            "Requirement in this Standard, GWR) on every required matrix page "
+            "(page 47 nested/ambiguous geometry is fail-closed and excluded): "
             f"{missing_matrix_pages}"
         )
+
+    for nested_page in sorted(GOLDEN_5006A_NESTED_MATRIX_PAGE_NOS):
+        if nested_page in accepted_matrix_by_page:
+            raise RuntimeError(
+                f"5006A page {nested_page} nested/ambiguous matrix must remain "
+                "fail-closed and must not enter Markdown"
+            )
+        nested_native = [
+            entry
+            for entry in entries
+            if entry.get("page_no") == nested_page
+            and entry.get("source_kind") == "native"
+        ]
+        if not nested_native:
+            raise RuntimeError(
+                f"5006A page {nested_page} must still produce a native table artifact "
+                "so nested/ambiguous fail-closed can be proven"
+            )
+        if any(entry.get("decision") == "accepted" for entry in nested_native):
+            raise RuntimeError(
+                f"5006A page {nested_page} nested/ambiguous matrix was accepted"
+            )
+        if not any(entry.get("decision") == "rejected" for entry in nested_native):
+            raise RuntimeError(
+                f"5006A page {nested_page} nested/ambiguous matrix was not rejected"
+            )
 
     page36_markdown = "\n".join(
         _table_block(markdown, entry["table_id"]) or ""
@@ -682,6 +720,9 @@ def validate_5006a_golden_artifacts(
     return {
         "all_pages_trusted": True,
         "matrix_pages_with_accepted_native_table": sorted(accepted_matrix_by_page),
+        "nested_or_ambiguous_matrix_pages_excluded": sorted(
+            GOLDEN_5006A_NESTED_MATRIX_PAGE_NOS
+        ),
         "page36_row_order": "2.4.2 < 4. Requirements < 4.1",
         "page17_image_table_isolated": True,
         "picture_pages_isolated": [20, 22, 25],
