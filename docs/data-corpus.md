@@ -23,17 +23,17 @@ Evidence-bounded QA
 
 不要把当前文档数量写死进核心代码；应从实际数据目录/manifest 获取。
 
-## 3. Expected Production Language
+## 3. Expected Language Support
 
 长期要求：
 
 ```text
-中文文档为主
-兼顾英文技术文档
+支持中文技术文档
+支持英文技术文档
 支持中英跨语言检索
 ```
 
-尤其要覆盖：
+尤其需要覆盖：
 
 ```text
 Chinese Query → English technical document
