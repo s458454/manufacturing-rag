@@ -281,21 +281,25 @@ A3 baseline：
 
 ## A3.7 Leaf Content
 
-Baseline Dense/BM25 都直接使用：
+`[FROZEN baseline]`
+
+Leaf.content 为 Leaf 的正文内容。Dense 与 BM25 baseline 直接使用：
 
 ```text
 Leaf.content
 ```
 
-不默认构造：
+Section heading **不作为额外 retrieval prefix 拼入 Leaf.content**。
+
+当前 baseline 不构造：
 
 ```text
 retrieval_text = heading + content
 ```
 
-标题增强只作为未来实验。
+`heading + content` 只作为后续 retrieval enhancement / D1 ablation；只有 D1 证明 Chunk 脱离标题后明显影响 Retrieval 时再启用。
 
-`[PROVISIONAL]`：Leaf.content 最终序列化是否包含“当前 Section 自身 heading”，以及 `<!-- PDF page N -->` 是否只转 provenance 而不进入 Retrieval text，需在实现前再确认。
+`[PROVISIONAL]`：`<!-- PDF page N -->` 是否从 retrieval text 中剥离、仅转换为 provenance，当前尚未最终冻结。
 
 ## A3.8 Page Range
 
@@ -601,7 +605,7 @@ full rebuild、upsert、重复入库防护、schema/build versioning 尚未冻�
 5. Overlap 不跨 Section。
 6. Leaf 是唯一第一阶段 Retriever Candidate。
 7. 多级 Section hierarchy 必须可恢复。
-8. Dense/BM25 baseline 都索引 Leaf.content。
+8. Dense/BM25 baseline 都索引 Leaf.content，Section heading 不作为额外 retrieval prefix。
 9. Qwen3-Embedding-4B + 2560d + L2 normalize。
 10. Milvus FLAT/IP + Native BM25。
 11. 当前不使用 HNSW；future ANN 优先 IVF_FLAT。
