@@ -40,7 +40,9 @@ D Evaluation
 
 ```text
 A0 Preprocessing       implemented / frozen
-A1-A6 Knowledge Base   design documented / implementation pending
+A1 Markdown Loading    implemented / frozen
+A2 Document Registry   implemented / frozen
+A3-A6 Knowledge Base   design documented / implementation pending
 B1-B6 Retrieval        design documented / implementation pending
 C1-C3 Generation       design documented / implementation pending
 D1 Retrieval Eval      design documented / implementation pending
@@ -74,6 +76,7 @@ D2 Generation Eval     deferred
 ├── agent.md
 ├── code/
 │   ├── C1-C9/                  # All-in-RAG 历史/教程参考代码
+│   ├── knowledge_base/         # A1 Markdown loading；A2 Document Registry
 │   └── preprocessing/          # 当前 A0 正式实现与测试
 ├── data/engineering_docs/      # 当前公开工程技术 PDF 与 manifest
 ├── docling/                    # Docling 源码快照

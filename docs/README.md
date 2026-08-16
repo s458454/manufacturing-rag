@@ -18,6 +18,8 @@
 | `Preprocessing/2026-08-14-region-ocr-isolation-and-native-table-empty-cell.md` | A0 Region-OCR / 空单元格 / AABB 实现说明 |
 | `proceeding/` | 阶段日志、烟测、故障、验收、交接 |
 | `proceeding/2026-08-15-a0-freeze.md` | A0 冻结补记：嵌套表不收、Golden 第 47 页合同 |
+| `proceeding/2026-08-15-a1-freeze.md` | A1 实现交接：Linux 16 passed / 3-doc canonical smoke；申请关闭 |
+| `proceeding/2026-08-16-a2-freeze.md` | A2 实现交接：Document Registry；Linux pytest + 3-doc NASA manifest smoke |
 | `manufacturing-rag-v0.1-spec.md` | 历史 V0.1 spec，与当前模块文档冲突时以模块文档为准 |
 
 ## Reading Rule

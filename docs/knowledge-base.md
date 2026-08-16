@@ -82,7 +82,7 @@ table reparse
 
 # A2 — Minimal Provenance / Identity
 
-状态：`[FROZEN principle]`
+状态：Document Registry `[FROZEN]`；Leaf identity 字段契约见 A2.3，由 A3/A4 实现
 
 ## A2.1 Metadata Rule
 
@@ -102,9 +102,9 @@ document_type
 
 ## A2.2 Document Registry
 
-文档级信息只保存一次。
+状态：`[FROZEN]`
 
-至少需要：
+文档级信息只保存一次。持久化字段只有：
 
 ```text
 document_id
@@ -112,11 +112,129 @@ document_title
 source
 ```
 
-其中 `document_id` 是跨建库稳定的文档身份。
+`document_id` 是跨建库稳定的文档身份：沿用 A1 `LoadedMarkdownDocument.document_id`，必须与同目录 `quality_report.json` 的 `document_id` 一致。A2 不重新生成、不从文件名二次推导。
 
-`document_title/source` 的可靠来源规则：`[PROVISIONAL]`，实现时不得随意由 LLM 推断。
+`source` 是面向 citation / UI 的原始文档逻辑来源标识，不是当前服务器文件系统绝对路径。C3 从 Registry 取 title/source，模型不得自己猜路径或 URL。
+
+`quality_report.json` 只作为 identity / provenance metadata 读取：
+
+```text
+document_id
+source
+source_sha256
+```
+
+不得把 audit JSON、OCR text、`document.json`、`regions.json` 作为正文入库。
+
+禁止用以下方式得到 title/source：
+
+```text
+first Markdown heading
+LLM title extraction
+正文正则猜标题
+按文件名 / 目录名模糊匹配 manifest
+```
+
+### Join
+
+显式提供 corpus manifest 时，join 键为完整 SHA-256：
+
+```text
+quality_report.source_sha256 == manifest.sha256
+```
+
+精确匹配（strip 后大小写不敏感）。不得用 `document_id` 的 16 位 hash 前缀或文件名单独 join。
+
+Manifest 语义：
+
+```text
+本次 canonical corpus ⊆ manifest
+```
+
+多余未使用行不失败。manifest 内 `sha256` 必须全局唯一；重复则整次 fail fast。
+
+### Manifest mode
+
+`manifest_path` 是本次 build 的 metadata authority。每一篇 LoadedMarkdownDocument 都必须唯一命中一行。任一失败整次失败，禁止对其余文档做 filename fallback。
+
+```text
+document_title = manifest.title
+
+candidate_source =
+  strip(source_url)  若非空
+  否则 strip(local_path)
+
+若 candidate_source 是机器绑定文件系统路径 → fail fast
+否则 source = candidate_source
+```
+
+对 strip 后的最终 candidate（不是只检查 `local_path` 字段）拒绝：
+
+```text
+1. 以 "/" 开头
+2. 以 "\" 开头
+3. 匹配 ^[A-Za-z]:[\\/]
+4. 大小写不敏感以 "file:" 开头
+```
+
+不做通用 URI allowlist。下列只要不被上述规则命中即允许：
+
+```text
+raw/joining/foo.pdf
+joining/foo.pdf
+https://...
+http://...
+s3://...
+dms://...
+oss://...
+```
+
+title 为空，或 `source_url` 与 `local_path` 都为空，fail fast。
+
+### No-manifest mode
+
+未传 `manifest_path` 时，全部文档统一从 `quality_report.source` 做跨平台 filename fallback。不要把 manifest 模式的绝对路径拒绝规则套到这条路径上：A0 source 只是提取输入。
+
+```text
+document_title = basename(quality_report.source).stem
+source         = basename(quality_report.source)
+```
+
+basename/stem 必须同时识别 POSIX `/` 与 Windows `\`，不依赖建库机 OS。例如：
+
+```text
+/foo/bar/manual.pdf   → title=manual  source=manual.pdf
+D:\foo\bar\manual.pdf → title=manual  source=manual.pdf
+```
+
+`quality_report.source` 缺失或提取结果为空 → fail fast。
+
+### 非持久化
+
+下列字段只用于构建期 join/校验，不写入 RegistryEntry：
+
+```text
+source_sha256
+local_path
+organization
+category
+year
+pages
+bytes
+```
+
+接口不得硬编码 `data/engineering_docs/manifest.csv`：
+
+```python
+build_document_registry(
+    documents: list[LoadedMarkdownDocument],
+    manifest_path: Path | None = None,
+) -> dict[str, DocumentRegistryEntry]
+```
 
 ## A2.3 Leaf Identity / Provenance
+
+本阶段 Document Registry **不**持久化下列字段；它们由 A3/A4 在 Leaf/Section 上写入。
 
 Leaf 需要：
 

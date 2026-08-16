@@ -36,7 +36,6 @@
 拆分后仍必须保留为未冻结：
 
 - A1/A6 rebuild/upsert/versioning
-- A2 document title/source reliable extraction
 - A3 tokenizer
 - A3 Leaf.content 是否包含当前 Section heading / page marker serialization
 - A4 Section text materialization
