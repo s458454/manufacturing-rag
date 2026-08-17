@@ -20,6 +20,8 @@
 | `proceeding/2026-08-15-a0-freeze.md` | A0 冻结补记：嵌套表不收、Golden 第 47 页合同 |
 | `proceeding/2026-08-15-a1-freeze.md` | A1 实现交接：Linux 16 passed / 3-doc canonical smoke；申请关闭 |
 | `proceeding/2026-08-16-a2-freeze.md` | A2 实现交接：Document Registry；Linux pytest + 3-doc NASA manifest smoke |
+| `proceeding/2026-08-17-a3-freeze.md` | A3 实现交接：结构解析 + Leaf chunking；Linux 122 passed / 3-doc smoke |
+| `proceeding/2026-08-17-a4-section-hierarchy.md` | A4 实现交接：多级 Section hierarchy + source-span recovery；Linux 161 passed / 3-doc smoke；申请关闭 |
 | `manufacturing-rag-v0.1-spec.md` | 历史 V0.1 spec，与当前模块文档冲突时以模块文档为准 |
 
 ## Reading Rule

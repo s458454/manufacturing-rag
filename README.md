@@ -2,9 +2,11 @@
 
 面向制造业公开技术文档的检索增强生成（RAG）实验项目。
 
-当前版本为 `ver-0`：完成了项目方向定义、首批公开工程文档收集和原始
-All-in-RAG 参考代码整理，作为后续制造业 RAG 重构的可追溯起点。它不是已完成的
-生产系统。
+当前发布版本为 `ver-0.4`：A0 预处理已冻结；A1 Markdown Loading、A2 Document Registry、
+A3 Structure-aware Leaf chunking、A4 Section hierarchy 已实现，并在三篇正式 NASA
+语料上通过 Linux 验收。A5 Embedding 及之后模块尚未实现。它不是已完成的生产系统。
+
+仓库起点仍是 `ver-0`：项目方向定义、首批公开工程文档收集和原始 All-in-RAG 参考代码整理。
 
 ## ver-0 范围
 
@@ -20,7 +22,10 @@ All-in-RAG 参考代码整理，作为后续制造业 RAG 重构的可追溯起�
 
 ```text
 .
-├── code/                         # C1-C9 原始参考代码与依赖配置
+├── code/
+│   ├── C1-C9/                    # All-in-RAG 历史/教程参考代码
+│   ├── knowledge_base/           # A1–A4：Loading / Registry / Leaf / Section hierarchy
+│   └── preprocessing/            # A0 正式实现
 ├── data/engineering_docs/        # 制造业公开文档及可校验清单
 ├── docling/                      # Docling 2.115.0 源码快照
 ├── docs/                         # 稳定需求、模块文档、验收与 proceeding

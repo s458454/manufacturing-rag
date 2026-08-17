@@ -371,9 +371,27 @@ chunk_size
 overlap
 ```
 
-两者必须配置化。
+两者必须配置化。默认 baseline：
 
-Tokenizer 口径：`[PROVISIONAL]`。应与实际模型/预算管理保持可解释一致，但当前未冻结具体 tokenizer。
+```text
+chunk_size = 768
+overlap_tokens = 96
+```
+
+只在 `code/knowledge_base/chunking_config.py` 定义一次。`chunk_size` 是普通可切分正文的 soft upper bound，不是 Table Atomicity 的绝对硬限制。
+
+Tokenizer 口径：`[FROZEN]` for A3 token accounting / profiling。
+
+```text
+Qwen/Qwen3-Embedding-4B
+transformers.AutoTokenizer
+```
+
+identifier 或本地 tokenizer 路径必须可配置，不得硬编码服务器绝对路径。不得使用 tiktoken、字符数估算、Qwen2.5 generation tokenizer 或其他 embedding tokenizer。
+
+A3.2 packing：`[FROZEN]` structure-first，Markdown block-aware greedy packing；仅当单个非-table block 自身超过 `chunk_size` 时才做 tokenizer sliding fallback（window=768，overlap=96，stride=672）。Overlap 计入下一 Leaf 的 768 budget；96 是可退让目标，不得为凑满 96 切坏完整 block。
+
+单张 table `>768` 时发出完整 table-only oversize Leaf，这是合法例外。
 
 ## A3.5 Overlap
 
@@ -417,7 +435,7 @@ retrieval_text = heading + content
 
 `heading + content` 只作为后续 retrieval enhancement / D1 ablation；只有 D1 证明 Chunk 脱离标题后明显影响 Retrieval 时再启用。
 
-`[PROVISIONAL]`：`<!-- PDF page N -->` 是否从 retrieval text 中剥离、仅转换为 provenance，当前尚未最终冻结。
+`<!-- PDF page N -->`：`[FROZEN]` 只用于 `page_start` / `page_end` provenance，不得进入未来 `Leaf.content`，也不得计入 Section body token profiling。
 
 ## A3.8 Page Range
 
@@ -434,30 +452,22 @@ page_end
 
 # A4 — Hierarchical Parent-Child
 
-状态：多级 hierarchy `[FROZEN]`；精确恢复策略 `[PROVISIONAL]`
+状态：多级 hierarchy `[FROZEN]`；Section text materialization `[FROZEN]` source span recovery；B6 exact ancestor selection `[PROVISIONAL]`；Section Tree 生产持久化介质 `[PROVISIONAL]`
 
 ## A4.1 Hierarchy
 
+必须保持真实 Markdown 多级结构。Parent 不固定 H2/H3。
+
 ```text
 Document
-└── H1 Section
-    └── H2 Section
-        └── H3 Section
-            ├── Leaf
-            └── Leaf
+├── document_root          # 仅当存在 heading 外正文
+├── H2                     # 无 H1 时也可以是 top-level
+│   └── H3
+│       └── H4
+└── H2
 ```
 
-不固定：
-
-```text
-Parent = H2
-```
-
-或：
-
-```text
-Parent = H3
-```
+`document_root` 不是假 H1，也不是所有 top-level heading 的 parent。允许无 H1、多个 top-level heading、heading level jump（如 H2→H4）。禁止补 synthetic heading。
 
 ## A4.2 Relationship
 
@@ -467,13 +477,32 @@ Leaf：
 section_id = nearest semantic Section
 ```
 
-Section：
+A3 负责生成 `section_id` 并写入 Leaf。A4 只验证、不修改。terminal span（preface/lead）只是 Chunking 边界，不单独成为 A4 Section 节点。`SectionRef.kind` 只有 `heading` 与 `document_root`。
+
+Heading parent 规则：
+
+```text
+parent_section_id
+= 当前 Heading 之前最近的、heading_level 更小的 Heading Section
+```
+
+重复 heading text 合法；identity 只用 A3 `section_id`，不得按标题文本去重。空 parent heading（自身无 Leaf）必须保留节点，否则会丢层。
+
+A3 `SectionRef.source_start/source_end` 是 identity anchor，不是 recovery span。A4 不修改 `SectionRef`，不重新生成 `section_id`。
+
+Section 持久化最小字段：
 
 ```text
 section_id
+document_id
 parent_section_id
+kind
+heading_level
 heading
-recoverable text/span
+source_start
+source_end
+page_start
+page_end
 ```
 
 B6 必须能够：
@@ -485,32 +514,37 @@ Leaf
 → ...
 ```
 
+A4 只提供 hierarchy 与恢复能力，不实现 ancestor selection / budget / shared-parent grouping / neighbor fallback。
+
 ## A4.3 Section Text Materialization
 
-`[PROVISIONAL]`
+`[FROZEN]`
 
-系统必须能恢复一个 Section 的完整语义范围，但当前不冻结 Section Store 必须直接存：
+Section 使用 source span 从 trusted `document.md` 恢复，不持久化完整 `Section.content`，不从 Leaf 拼接 Parent。
 
-```text
-content
-```
-
-还是存：
+坐标系：
 
 ```text
-source span / child references
+SectionNode.source_start / source_end
+= 0-based Markdown line index
+= half-open [start, end)
+= 与 A3 Heading.start_line / ParsedMarkdownDocument.line_count 同一套坐标
 ```
 
-只要 B6 能可靠恢复：
+不是字符 offset，也不是 tokenizer offset。
+
+Heading semantic span：从当前 heading 起到下一个 `heading_level <= 当前` 的 heading 之前，包含 descendants。
+
+`document_root`：
 
 ```text
-heading
-section text
-parent link
-page range/path
+headed + lead:       [0, first heading start)
+completely unheaded: [0, document line_count)
 ```
 
-即可。
+恢复时只剥离整行 `<!-- PDF page N -->`，保留真实 headings、child headings、lists、tables、普通 HTML/Markdown comment。page range 由 semantic span + A3.1 page markers 推导。
+
+当前实现是 in-memory `SectionHierarchy`。JSON artifact 只用于 smoke/debug，不是生产 Section Store。生产持久化介质见 A6.8，仍为 `[PROVISIONAL]`。
 
 ## A4.4 Neighbor
 
@@ -723,7 +757,7 @@ full rebuild、upsert、重复入库防护、schema/build versioning 尚未冻�
 5. Overlap 不跨 Section。
 6. Leaf 是唯一第一阶段 Retriever Candidate。
 7. 多级 Section hierarchy 必须可恢复。
-8. Dense/BM25 baseline 都索引 Leaf.content，Section heading 不作为额外 retrieval prefix。
+8. Dense/BM25 baseline 都索引 Leaf.content，Section heading 不作为额外 retrieval prefix；`<!-- PDF page N -->` 不进入 Leaf.content。
 9. Qwen3-Embedding-4B + 2560d + L2 normalize。
 10. Milvus FLAT/IP + Native BM25。
 11. 当前不使用 HNSW；future ANN 优先 IVF_FLAT。

@@ -36,9 +36,6 @@
 拆分后仍必须保留为未冻结：
 
 - A1/A6 rebuild/upsert/versioning
-- A3 tokenizer
-- A3 Leaf.content 是否包含当前 Section heading / page marker serialization
-- A4 Section text materialization
 - B3 BM25 Chinese analyzer/tokenizer
 - B5 reranker input serialization
 - B6 exact ancestor selection
