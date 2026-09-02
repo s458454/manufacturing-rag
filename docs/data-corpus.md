@@ -19,9 +19,26 @@ Context Recovery
 Evidence-bounded QA
 ```
 
-当前公开语料主要是英文，这是**数据可获取性**导致的开发条件，不代表最终生产只面向英文文档。
+当前公开语料主要是英文 NASA/NIST 标准与材料手册，这是**数据可获取性**导致的开发条件，不代表最终生产只面向英文文档。
 
 不要把当前文档数量写死进核心代码；应从实际数据目录/manifest 获取。
+
+### 2.1 ver1 / ver2 语料准入原则
+
+`[CURRENT IMPLEMENTATION]`
+
+`ver-0.5` 知识库构建（ver1）只准入**数字原生 PDF**（PDF 本身带可提取文本层，A0 走 native parse 为主，不依赖 OCR 兜底）：
+
+```text
+ver1
+→ 数字 PDF 直接转 document.md
+→ 不做 OCR 验证/依赖
+→ 无论语言，扫描件/文本层不可提取的文档都不在本轮准入
+```
+
+已知需要 OCR 才能正确转换的文档（含英文 1970s 年代扫描版 Materials Data Handbook）**推迟到 ver2**。ver2 计划通过后续 A0 MinerU 全量 OCR 迁移接入，不得在 ver1 静默依赖未验证的 OCR 结果。
+
+判断一份 PDF 是否属于 ver1 范围，以 A0 实际运行结果为准（原生文本可提取、当前 Docling 转换成功、Chunk/Embedding 数值门禁全部通过），不是靠猜测或文件命名。
 
 ## 3. Expected Language Support
 
@@ -57,6 +74,8 @@ Chinese Query → English technical document
 ```
 
 这不是业务 Metadata Schema；只是说明测试语料应覆盖不同类型的技术知识。
+
+当前公开语料覆盖航天制造/材料标准（NASA/NIST）。是否扩展领域范围，由后续公开语料补充决定，不在本文件提前限定。
 
 ## 5. Data Boundary
 

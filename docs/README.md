@@ -16,12 +16,17 @@
 | `evaluation.md` | D1 Retrieval Evaluation；D2 当前状态 |
 | `Preprocessing/pdf-preprocessing-server-acceptance.md` | 服务器验收命令与 Golden 检查 |
 | `Preprocessing/2026-08-14-region-ocr-isolation-and-native-table-empty-cell.md` | A0 Region-OCR / 空单元格 / AABB 实现说明 |
+| `Preprocessing/mineru-a0-integration.md` | MinerU 接入评估（`[PROVISIONAL]`；本版 A0 未切换） |
+| `Preprocessing/mineru-a0-migration-implementation-requirements-v1.md` | 后续 A0 MinerU 全量 OCR 迁移实现需求 |
 | `proceeding/` | 阶段日志、烟测、故障、验收、交接 |
 | `proceeding/2026-08-15-a0-freeze.md` | A0 冻结补记：嵌套表不收、Golden 第 47 页合同 |
 | `proceeding/2026-08-15-a1-freeze.md` | A1 实现交接：Linux 16 passed / 3-doc canonical smoke；申请关闭 |
 | `proceeding/2026-08-16-a2-freeze.md` | A2 实现交接：Document Registry；Linux pytest + 3-doc NASA manifest smoke |
 | `proceeding/2026-08-17-a3-freeze.md` | A3 实现交接：结构解析 + Leaf chunking；Linux 122 passed / 3-doc smoke |
 | `proceeding/2026-08-17-a4-section-hierarchy.md` | A4 实现交接：多级 Section hierarchy + source-span recovery；Linux 161 passed / 3-doc smoke；申请关闭 |
+| `proceeding/2026-08-18-a5-dense-embedding.md` | A5 实现交接：Qwen3-Embedding-4B / 2560-d / last-token pooling |
+| `proceeding/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md` | B1 Query Router v1 冻结需求 |
+| `proceeding/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md` | B2 Query Processing v1 冻结需求 |
 | `manufacturing-rag-v0.1-spec.md` | 历史 V0.1 spec，与当前模块文档冲突时以模块文档为准 |
 
 ## Reading Rule

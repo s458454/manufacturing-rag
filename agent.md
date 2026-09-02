@@ -39,13 +39,16 @@ D Evaluation
 当前需求成熟度与代码完成度不是一回事。
 
 ```text
-A0 Preprocessing       implemented / frozen
+A0 Preprocessing       implemented / frozen (Docling/RapidOCR); MinerU snapshot vendored for next OCR migration
 A1 Markdown Loading    implemented / frozen
 A2 Document Registry   implemented / frozen
 A3 Structure-aware Chunking implemented / frozen
 A4 Hierarchical Parent-Child implementation complete / pending upstream acceptance
-A5-A6 Knowledge Base   design documented / implementation pending
-B1-B6 Retrieval        design documented / implementation pending
+A5 Dense Embedding     implemented
+A6 Milvus Index        design documented / implementation pending
+B1 Query Router        design frozen / implementation pending
+B2 Query Processing    design frozen / implementation pending
+B3-B6 Retrieval        design documented / implementation pending
 C1-C3 Generation       design documented / implementation pending
 D1 Retrieval Eval      design documented / implementation pending
 D2 Generation Eval     deferred
@@ -78,10 +81,11 @@ D2 Generation Eval     deferred
 ├── agent.md
 ├── code/
 │   ├── C1-C9/                  # All-in-RAG 历史/教程参考代码
-│   ├── knowledge_base/         # A1 Markdown loading；A2 Document Registry；A3 structure-aware Leaf chunking；A4 Section hierarchy
-│   └── preprocessing/          # 当前 A0 正式实现与测试
+│   ├── knowledge_base/         # A1 Markdown loading；A2 Document Registry；A3 structure-aware Leaf chunking；A4 Section hierarchy；A5 Dense Embedding
+│   └── preprocessing/          # 当前 A0 正式实现与测试（Docling 主链）
 ├── data/engineering_docs/      # 当前公开工程技术 PDF 与 manifest
-├── docling/                    # Docling 源码快照
+├── docling/                    # Docling 源码快照（当前 A0 后端对照）
+├── mineru/                     # MinerU 3.4.5 源码快照（后续 A0 全量 OCR 迁移，本版未切换）
 ├── docs/                       # 稳定需求、模块文档、验收与 proceeding
 └── models/                     # 本地模型资产/manifest；不把模型权重当源码提交
 ```
@@ -159,8 +163,8 @@ docs/
 ├── generation.md
 ├── evaluation.md
 ├── manufacturing-rag-v0.1-spec.md     # 历史 spec
-├── Preprocessing/                      # A0 详细实现/服务器验收资料
-└── proceeding/                         # 阶段过程与交接
+├── Preprocessing/                      # A0 详细实现/服务器验收资料；含 MinerU 迁移需求
+└── proceeding/                         # 阶段过程与交接；含 A5 实现交接与 B1/B2 v1 冻结需求
 ```
 
 | 需要理解/修改的内容 | 首先阅读 |

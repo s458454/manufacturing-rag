@@ -18,6 +18,20 @@ the complete license text distributed with each component.
 - Copyright: IBM Corp. and Docling contributors
 - Included license: `docling/LICENSE`
 
+## MinerU
+
+- Source: <https://github.com/opendatalab/MinerU>
+- Snapshot in this repository: `mineru/`, tag `mineru-3.4.5-released`, Git ref
+  `fbb1257a555a3fde78ae5aaaa931e3b3f8fb2883`
+- Upstream license: MinerU Open Source License, based on Apache License 2.0 with additional
+  commercial-threshold and online-service attribution conditions
+- Included license: `mineru/LICENSE.md`
+- Snapshot identity and source archive checksum: `mineru/UPSTREAM_REVISION`
+
+The source snapshot does not include MinerU model weights. Model artifacts downloaded or
+provisioned for a runtime remain subject to their upstream terms and must be pinned separately
+before MinerU can become the reproducible A0 production backend.
+
 ## Preprocessing model dependencies
 
 The repository tracks model identity, configuration, source URLs, sizes, and SHA-256 checksums in

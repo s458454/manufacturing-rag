@@ -2,9 +2,12 @@
 
 面向制造业公开技术文档的检索增强生成（RAG）实验项目。
 
-当前发布版本为 `ver-0.4`：A0 预处理已冻结；A1 Markdown Loading、A2 Document Registry、
-A3 Structure-aware Leaf chunking、A4 Section hierarchy 已实现，并在三篇正式 NASA
-语料上通过 Linux 验收。A5 Embedding 及之后模块尚未实现。它不是已完成的生产系统。
+当前发布版本为 `ver-0.5`：A0 预处理仍以冻结的 Docling/RapidOCR 主链运行；A1 Markdown
+Loading、A2 Document Registry、A3 Structure-aware Leaf chunking、A4 Section hierarchy、
+A5 Dense Embedding 已实现，并在正式 NASA 语料上通过 Linux 验收。B1 Query Router 与
+B2 Query Processing 的 v1 需求已冻结，实现尚未开始。仓库内包含 MinerU 3.4.5
+源码快照，供后续将 A0 重构为全量 OCR 主链使用；本版 A0 尚未切换。A6 Milvus 及之后模块
+尚未实现。它不是已完成的生产系统。
 
 仓库起点仍是 `ver-0`：项目方向定义、首批公开工程文档收集和原始 All-in-RAG 参考代码整理。
 
@@ -13,7 +16,8 @@ A3 Structure-aware Leaf chunking、A4 Section hierarchy 已实现，并在三篇
 - 建立制造业公开技术文档 RAG 的 V0.1 设计规范。
 - 收录 24 份来自 NASA、NIST 官方来源的材料、加工、连接制造、制造规范与质量检测文档。
 - 保留原始 All-in-RAG 的 C1-C9 示例代码，供后续审计和重构时对照。
-- 内置 Docling 源码快照，供文档解析方案研究。
+- 内置 Docling 源码快照，供当前 A0 解析方案对照。
+- 内置 MinerU 3.4.5 源码快照，供后续 A0 全量 OCR 迁移研究。
 
 当前 C1-C9 中仍存在教程、菜谱和 Graph RAG 示例逻辑；部分脚本依赖已从本仓库移除的
 原教程数据，因此不保证能够直接运行。这些文件是重构参考，不代表最终业务实现。
@@ -24,10 +28,11 @@ A3 Structure-aware Leaf chunking、A4 Section hierarchy 已实现，并在三篇
 .
 ├── code/
 │   ├── C1-C9/                    # All-in-RAG 历史/教程参考代码
-│   ├── knowledge_base/           # A1–A4：Loading / Registry / Leaf / Section hierarchy
-│   └── preprocessing/            # A0 正式实现
+│   ├── knowledge_base/           # A1–A5：Loading / Registry / Leaf / Hierarchy / Embedding
+│   └── preprocessing/            # A0 正式实现（本版仍为 Docling 主链）
 ├── data/engineering_docs/        # 制造业公开文档及可校验清单
 ├── docling/                      # Docling 2.115.0 源码快照
+├── mineru/                       # MinerU 3.4.5 源码快照（下一版 A0 OCR 迁移）
 ├── docs/                         # 稳定需求、模块文档、验收与 proceeding
 └── models/                       # 模型目录占位符，不提交模型权重
 ```
@@ -46,12 +51,11 @@ A3 Structure-aware Leaf chunking、A4 Section hierarchy 已实现，并在三篇
 详细目标、数据方案、Metadata Schema、分块策略、检索链路和评测规划见
 [`docs/manufacturing-rag-v0.1-spec.md`](docs/manufacturing-rag-v0.1-spec.md)。
 
-后续工作的重点包括：
-
-1. 审计 C8/C9 参考实现，识别保留、删除和改造模块。
-2. 将菜谱领域的数据结构、路由和生成提示改造成制造业文档领域。
-3. 增加 PDF 标准化解析、工业 Metadata、Reranking、引用式回答与离线评测。
-4. 逐步补齐可复现的环境安装、测试和运行入口。
+`ver-0.5` 之后的下一阶段是把 A0 从 Docling/RapidOCR 主链重构为 MinerU 全量 OCR
+（数字 PDF 与扫描 PDF 一律走 OCR），接入评估与实现需求见
+[`docs/Preprocessing/mineru-a0-integration.md`](docs/Preprocessing/mineru-a0-integration.md)
+与 [`docs/Preprocessing/mineru-a0-migration-implementation-requirements-v1.md`](docs/Preprocessing/mineru-a0-migration-implementation-requirements-v1.md)。
+在该迁移完成并冻结前，不得把 MinerU 当作当前生产 A0。
 
 ## PDF 预处理入口
 
@@ -83,6 +87,22 @@ CUDA_VISIBLE_DEVICES=0 python code/preprocessing/verify_pdf_preprocess_server.py
 ```
 
 该命令会校验本地模型 SHA-256、构造真实 RapidOCR 3.9.2 Det/Cls/Rec 会话、执行真实页面 OCR，并跑同一页端到端流程。正式输出采用事务目录：仅完整成功且至少有一页可入库时替换稳定目录；`partial_success` 或固定质量门禁拒绝的审计产物保存在 `.failed/`，不会覆盖上一次成功产物。
+
+## A5 Dense Embedding 入口
+
+`code/knowledge_base/dense_embedding.py` 对 A3 Leaf 的 `content` 做 document-side 编码：Qwen3-Embedding-4B、left padding、last-token pooling、L2 normalize、2560-d float32。不添加 document instruction，不实现 query-side 与 A6。超过 8192 inference token 必须失败，禁止 silent truncation。验收口径见 [`docs/proceeding/2026-08-18-a5-dense-embedding.md`](docs/proceeding/2026-08-18-a5-dense-embedding.md)。
+
+```bash
+export PYTHONPATH="$PWD/code${PYTHONPATH:+:$PYTHONPATH}"
+python -m knowledge_base.dense_embedding \
+  --canonical-root "$PWD/outputs/preprocessing" \
+  --model Qwen/Qwen3-Embedding-4B \
+  --device cuda \
+  --batch-size 4 \
+  --max-input-tokens 8192 \
+  --output /tmp/a5-embeddings.npz \
+  --report /tmp/a5-embedding-report.json
+```
 
 ## 环境提示
 

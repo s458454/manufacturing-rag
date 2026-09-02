@@ -25,6 +25,15 @@ _EXPORTS = {
     "SectionNode": "section_hierarchy",
     "SectionHierarchy": "section_hierarchy",
     "build_section_hierarchy": "section_hierarchy",
+    "A5EmbeddingError": "dense_embedding",
+    "DenseEmbeddingConfig": "dense_embedding",
+    "DenseEmbeddingResult": "dense_embedding",
+    "Qwen3DenseEncoder": "dense_embedding",
+    "embed_leaves": "dense_embedding",
+    "DEFAULT_MODEL_NAME_OR_PATH": "embedding_config",
+    "DEFAULT_MAX_INPUT_TOKENS": "embedding_config",
+    "DEFAULT_BATCH_SIZE": "embedding_config",
+    "EMBEDDING_DIMENSION": "embedding_config",
 }
 
 __all__ = list(_EXPORTS)

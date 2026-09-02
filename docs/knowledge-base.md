@@ -567,7 +567,9 @@ next_chunk_id
 
 # A5 — Embedding
 
-状态：`[FROZEN baseline]`
+状态：document-side Dense Embedding `[FROZEN baseline]`；query instruction wording `[PROVISIONAL]`，由 B3 决定。
+
+实现入口：`code/knowledge_base/dense_embedding.py`。A5 只建立 `chunk_id ↔ dense_vector`，不修改 A3 `Leaf`，不实现 A6。
 
 ## A5.1 Model
 
@@ -575,13 +577,14 @@ next_chunk_id
 Qwen3-Embedding-4B
 ```
 
-Fallback：
+Backend：
 
 ```text
-Qwen3-Embedding-0.6B
+Transformers AutoTokenizer + AutoModel
+transformers >= 4.51.0
 ```
 
-只有明确出现加载/显存/吞吐/部署压力时才考虑 fallback。
+`Qwen3-Embedding-0.6B` 是 **explicit alternative profile**：更换必须经上游批准，并重新定义 A6 vector dimension、全量 rebuild。它 **不是 runtime fallback**。禁止加载 4B 失败后自动改用 0.6B。
 
 ## A5.2 Capability Requirement
 
@@ -604,11 +607,34 @@ Chinese Query → English technical document
 ```text
 Leaf.content
 → Qwen3-Embedding-4B
+→ left padding
+→ last-token pooling
 → L2 normalize
-→ 2560-d dense vector
+→ 2560-d float32 dense vector
 ```
 
-baseline 不添加 query instruction。
+唯一输入是 `Leaf.content`。禁止拼接 heading / section path / document title / source / instruction。
+
+官方 retrieval document 不需要 instruction。Query instruction 不属于 A5。
+
+Inference budget：
+
+```text
+max_input_tokens = 8192
+```
+
+这是 A5 推理预算，不是 A3 chunk size。禁止 silent truncation：超过 8192 必须 `A5EmbeddingError`。长度必须用 A5 tokenizer 的 inference special-token 口径验证，不能只相信 A3 `count_tokens()`（A3 为 `add_special_tokens=False`）。
+
+Baseline 部署：
+
+```text
+device = cuda
+forward dtype = FP16
+output dtype = FP32
+batch_size = 4   # 部署参数，可显式覆盖；OOM 不得自动降 batch
+```
+
+FlashAttention 2 不是 correctness requirement。
 
 ## A5.4 Query Side
 
@@ -620,12 +646,14 @@ original query
 → L2 normalize
 ```
 
-要求：
+本轮 **不实现** query serialization。要求留给 B3：
 
 - instruction 可配置；
 - wording 暂不冻结；
 - instruction 不改变 Query 的事实语义；
 - instruction 不是 B2 Query Rewrite。
+
+底层 encoder 以后可以复用 A5 `Qwen3DenseEncoder`，但不得在 `encode_documents()` 内添加 instruction。
 
 ## A5.5 Dimension
 
@@ -633,7 +661,9 @@ original query
 2560
 ```
 
-当前不启用 MRL 降维。
+当前不启用 MRL 降维。不允许 2560→1024/1536 后仍宣称同一 A5 baseline。
+
+A6 Dense baseline 为 FLAT + Inner Product。A5 完成 L2 normalize 后，A6 不再二次 normalize。
 
 ---
 
@@ -758,6 +788,6 @@ full rebuild、upsert、重复入库防护、schema/build versioning 尚未冻�
 6. Leaf 是唯一第一阶段 Retriever Candidate。
 7. 多级 Section hierarchy 必须可恢复。
 8. Dense/BM25 baseline 都索引 Leaf.content，Section heading 不作为额外 retrieval prefix；`<!-- PDF page N -->` 不进入 Leaf.content。
-9. Qwen3-Embedding-4B + 2560d + L2 normalize。
+9. Qwen3-Embedding-4B + Leaf.content only + last-token pooling + left padding + 2560d + L2 normalize；8192 inference budget，禁止 silent truncation；0.6B 不是 runtime fallback。
 10. Milvus FLAT/IP + Native BM25。
 11. 当前不使用 HNSW；future ANN 优先 IVF_FLAT。

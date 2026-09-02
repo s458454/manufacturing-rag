@@ -24,6 +24,8 @@ B6 Context Recovery
 
 状态：`[FROZEN]`
 
+v1 详细合同见 `docs/proceeding/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。实现尚未开始。
+
 ## B1.1 Routes
 
 只定义：
@@ -87,6 +89,8 @@ Router 具体实现手段（规则/轻量模型/LLM）当前未冻结，要求�
 # B2 — Query Processing
 
 状态：`[FROZEN baseline]`
+
+v1 详细合同见 `docs/proceeding/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`。实现尚未开始。Identity Processor（`NO TRANSFORMATION`）是当前 baseline。
 
 ## B2.1 Baseline
 

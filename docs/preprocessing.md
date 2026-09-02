@@ -15,6 +15,8 @@ Raw PDF
 
 知识库从 A1 开始，不重新解析 PDF。
 
+`[CURRENT IMPLEMENTATION]` 生产入口仍是 Docling + RapidOCR + TableFormer。仓库内 `mineru/` 是 MinerU 3.4.5 源码快照，供后续 A0 全量 OCR 迁移使用，**不改变本版 `[FROZEN]` 输出合同**。接入评估见 `docs/Preprocessing/mineru-a0-integration.md`；迁移实现需求见 `docs/Preprocessing/mineru-a0-migration-implementation-requirements-v1.md`。
+
 ## 2. Supported Input
 
 当前主线：
