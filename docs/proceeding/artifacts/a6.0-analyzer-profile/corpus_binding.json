@@ -1,0 +1,11 @@
+{
+  "corpus_document_count": 17,
+  "corpus_leaf_count": 2034,
+  "english_document_count": 14,
+  "english_leaf_count": 2009,
+  "chinese_document_count": 3,
+  "chinese_leaf_count": 25,
+  "max_content_bytes": 6778,
+  "a2_runtime": false,
+  "a5_runtime": false
+}

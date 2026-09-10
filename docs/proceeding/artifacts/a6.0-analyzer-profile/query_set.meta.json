@@ -1,0 +1,8 @@
+{
+  "purpose": "A6.0 analyzer profiling only",
+  "is_d1_gold": false,
+  "gold_chunk_id_build_specific": true,
+  "query_count_en": 30,
+  "query_count_zh": 30,
+  "query_set_sha256": "4029ebbf2d003f338aae769e0127619104d01bd8d1ec1f28acff3e58ac7d6e13"
+}

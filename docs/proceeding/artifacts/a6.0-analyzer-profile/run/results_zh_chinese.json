@@ -1,0 +1,798 @@
+{
+  "profile": "CHN-BUILTIN",
+  "query_count": 30,
+  "recall_at_5": 1.0,
+  "recall_at_20": 1.0,
+  "mrr_at_20": 0.961111111111111,
+  "miss_count": 0,
+  "miss_query_ids": [],
+  "results": [
+    {
+      "query_id": "CHN000",
+      "query": "避雷器包装运输贮存要求",
+      "gold_chunk_ids": [
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588"
+      ],
+      "top20_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a"
+      ],
+      "gold_rank": 2,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 0.5
+    },
+    {
+      "query_id": "CHN001",
+      "query": "投标方组织开箱验收和索赔",
+      "gold_chunk_ids": [
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588"
+      ],
+      "top20_chunk_ids": [
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN002",
+      "query": "技术资料符合本技术规范书2.3要求",
+      "gold_chunk_ids": [
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588"
+      ],
+      "top20_chunk_ids": [
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN003",
+      "query": "YH5WR-17/45型避雷器备品备件",
+      "gold_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922"
+      ],
+      "top20_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN004",
+      "query": "备品备件清单30只YH5WR-17/45",
+      "gold_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922"
+      ],
+      "top20_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN005",
+      "query": "备品备件应与产品同型号同工艺",
+      "gold_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922"
+      ],
+      "top20_chunk_ids": [
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN006",
+      "query": "2.3变电站一次及公用设备仿真",
+      "gold_chunk_ids": [
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb"
+      ],
+      "top20_chunk_ids": [
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN007",
+      "query": "主变压器配电装置直流系统仿真",
+      "gold_chunk_ids": [
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb"
+      ],
+      "top20_chunk_ids": [
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN008",
+      "query": "设置开关拒动保护拒动误动",
+      "gold_chunk_ids": [
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a"
+      ],
+      "top20_chunk_ids": [
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN009",
+      "query": "相间短路接地短路三相短路",
+      "gold_chunk_ids": [
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a"
+      ],
+      "top20_chunk_ids": [
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN010",
+      "query": "五防系统培训仿真",
+      "gold_chunk_ids": [
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a"
+      ],
+      "top20_chunk_ids": [
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "gold_rank": 3,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "query_id": "CHN011",
+      "query": "变压器漏油和PT断线异常",
+      "gold_chunk_ids": [
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6"
+      ],
+      "top20_chunk_ids": [
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN012",
+      "query": "设备巡视缺陷填报处理",
+      "gold_chunk_ids": [
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd"
+      ],
+      "top20_chunk_ids": [
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN013",
+      "query": "三维场景挂牌验电挂地线",
+      "gold_chunk_ids": [
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "top20_chunk_ids": [
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN014",
+      "query": "110kV常规变电站仿真培训系统",
+      "gold_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50"
+      ],
+      "top20_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN015",
+      "query": "110kV智能变电站仿真培训系统",
+      "gold_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50"
+      ],
+      "top20_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN016",
+      "query": "仿真机终端内存容量≥16GB",
+      "gold_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50"
+      ],
+      "top20_chunk_ids": [
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN017",
+      "query": "变电站仿真异常及事故处理案例",
+      "gold_chunk_ids": [
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09"
+      ],
+      "top20_chunk_ids": [
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN018",
+      "query": "电动汽车传导充电系统一般要求",
+      "gold_chunk_ids": [
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "top20_chunk_ids": [
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN019",
+      "query": "GB/T 18487.2-2017电磁兼容要求",
+      "gold_chunk_ids": [
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606"
+      ],
+      "top20_chunk_ids": [
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN020",
+      "query": "储能电池系统支持不低于108kW放电",
+      "gold_chunk_ids": [
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9"
+      ],
+      "top20_chunk_ids": [
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN021",
+      "query": "充电设备于250A能力",
+      "gold_chunk_ids": [
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9"
+      ],
+      "top20_chunk_ids": [
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN022",
+      "query": "充电机直流输出电压200-1000V",
+      "gold_chunk_ids": [
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3"
+      ],
+      "top20_chunk_ids": [
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN023",
+      "query": "充电机效率和功率因数表8",
+      "gold_chunk_ids": [
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3"
+      ],
+      "top20_chunk_ids": [
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN024",
+      "query": "充电机噪声应满足NB/T 33001-2018",
+      "gold_chunk_ids": [
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335"
+      ],
+      "top20_chunk_ids": [
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN025",
+      "query": "充电机额定负载温升NB/T 33001-2018",
+      "gold_chunk_ids": [
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba"
+      ],
+      "top20_chunk_ids": [
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN026",
+      "query": "充电机低温试验-20℃持续2h",
+      "gold_chunk_ids": [
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a"
+      ],
+      "top20_chunk_ids": [
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN027",
+      "query": "充电机静电放电抗扰度GB/T 18487.2-2017",
+      "gold_chunk_ids": [
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578"
+      ],
+      "top20_chunk_ids": [
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_a196c15ff64465494fb312f6fa7761549e142f38eb3b527479fd6d67451920f6",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN028",
+      "query": "充电机射频骚扰试验GB/T 18487.2-2017第8.3条",
+      "gold_chunk_ids": [
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6"
+      ],
+      "top20_chunk_ids": [
+        "chk_6dd2d26a9091e75a3bf9d55febce569942dcbb9d5b808e185b6230c3d6932ba6",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_fe665386c51cb3a3889c0c561a5c553e97a84508464529e9eb7c790d6d13f578",
+        "chk_09da57d97f91f5afb3784e2b73c4e02faca5ac701496b9e82c42092b643d640a",
+        "chk_98696b3064ebf3cd662ef6425bb2fc5cc249bda008599dac6529af489f3c2335",
+        "chk_a72cb96caf295405fceb090519bf5dee4b3dd120fac73f562a88987fb68dc8ba",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_c6318cb59c2653b900da8cbad7a56de17f2527d459a46f0641f0c1c899b58bbd",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    },
+    {
+      "query_id": "CHN029",
+      "query": "投标方提供安装调试技术资料",
+      "gold_chunk_ids": [
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb"
+      ],
+      "top20_chunk_ids": [
+        "chk_eeb6cabc698abe9c034e3315477bf9f46d445b59304593673fffb05fb2b854cb",
+        "chk_10ea1a27d0f2ab668b15f9d69214a9868b52b810ccb157e9d8c40108d3dc2588",
+        "chk_f77ab456fa6ab27bf7159a6200174d94b3713b0a157624fc1099d0f4c49face2",
+        "chk_2f2be4b6e36f420c6fc14c5e166f5ed6f4c7bc4e77938fce520ecb0621dd2b26",
+        "chk_35a3ac393ca6a08e6cb3429ce033700269a3d523880ebef7eabdbb1536e8d810",
+        "chk_e2b070f8387b88fd287d935cfaa106d9dad87ddbd34ae4389d85493970f1cd50",
+        "chk_865c77c7b9c71fd551cddf6a8e65219a8d1eda688932bfefda3d47f2d138e922",
+        "chk_756f51bc661b740912b5b91e71bad7acc13c71665f53bafa2b060c8d44a4ca09",
+        "chk_a1ed1632407176c1d3d640be8eaee5c2939e59da1fbbf35020afdbf98ab48606",
+        "chk_4d5cdc06023865e96a21c2136021e5fb6c064ef3959b37d9eea40803f493f2cb",
+        "chk_599d17f30118b1ceebd3387d522eb4afc50c4d3c7f12fe02d2e9987de97f3ae5",
+        "chk_eea895521e4032cff5b6a26f982460a464f1a20d2bbf6f4278a2dffd65d3e5e9",
+        "chk_c3a595e18eb2efe239f7148d1ef8878e071acc228c0d1d7d7fd728bb96739cc3",
+        "chk_b950ee67d3a157de6c5093d768d22d5b47ad57425afddc2364cb5daff13ad336",
+        "chk_715702e3b2cf8f2600c021c2eba234ffb781d33bd619e73995883c0a6e56f00a",
+        "chk_d9bf9af08e351a84e68190bdb58f5b96f76d53d9beb28fe5efe45b5ba99b5d08"
+      ],
+      "gold_rank": 1,
+      "hit_at_5": true,
+      "hit_at_20": true,
+      "reciprocal_rank": 1.0
+    }
+  ]
+}

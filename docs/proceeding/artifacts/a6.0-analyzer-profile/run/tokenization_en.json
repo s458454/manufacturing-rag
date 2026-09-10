@@ -1,0 +1,131 @@
+{
+  "electrical bonding for NASA launch vehicles": {
+    "EN-STD": [
+      "electrical",
+      "bonding",
+      "for",
+      "nasa",
+      "launch",
+      "vehicles"
+    ],
+    "EN-ICU": [
+      "electrical",
+      "bonding",
+      "for",
+      "nasa",
+      "launch",
+      "vehicles"
+    ]
+  },
+  "NASA-STD-4003A": {
+    "EN-STD": [
+      "nasa",
+      "std",
+      "4003a"
+    ],
+    "EN-ICU": [
+      "nasa",
+      "std",
+      "4003a"
+    ]
+  },
+  "NASA-STD-8739.4A": {
+    "EN-STD": [
+      "nasa",
+      "std",
+      "8739",
+      "4a"
+    ],
+    "EN-ICU": [
+      "nasa",
+      "std"
+    ]
+  },
+  "NISTIR7218": {
+    "EN-STD": [
+      "nistir7218"
+    ],
+    "EN-ICU": [
+      "nistir7218"
+    ]
+  },
+  "NISTIR 7734": {
+    "EN-STD": [
+      "nistir",
+      "7734"
+    ],
+    "EN-ICU": [
+      "nistir",
+      "7734"
+    ]
+  },
+  "150 V DC": {
+    "EN-STD": [
+      "150",
+      "v",
+      "dc"
+    ],
+    "EN-ICU": [
+      "150",
+      "v",
+      "dc"
+    ]
+  },
+  "fracture-critical metallic components": {
+    "EN-STD": [
+      "fracture",
+      "critical",
+      "metallic",
+      "components"
+    ],
+    "EN-ICU": [
+      "fracture",
+      "critical",
+      "metallic",
+      "components"
+    ]
+  },
+  "Class A (spaceflight)": {
+    "EN-STD": [
+      "class",
+      "a",
+      "spaceflight"
+    ],
+    "EN-ICU": [
+      "class",
+      "a",
+      "spaceflight"
+    ]
+  },
+  "section 4.1.2 requirements": {
+    "EN-STD": [
+      "section",
+      "4",
+      "1",
+      "2",
+      "requirements"
+    ],
+    "EN-ICU": [
+      "section",
+      "requirements"
+    ]
+  },
+  "additive manufacturing equipment and facility control": {
+    "EN-STD": [
+      "additive",
+      "manufacturing",
+      "equipment",
+      "and",
+      "facility",
+      "control"
+    ],
+    "EN-ICU": [
+      "additive",
+      "manufacturing",
+      "equipment",
+      "and",
+      "facility",
+      "control"
+    ]
+  }
+}
