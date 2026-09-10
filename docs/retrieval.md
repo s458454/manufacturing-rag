@@ -24,7 +24,7 @@ B6 Context Recovery
 
 状态：`[FROZEN]`
 
-v1 详细合同见 `docs/proceeding/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。实现尚未开始。
+v1 详细合同见 `docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。实现尚未开始。
 
 ## B1.1 Routes
 
@@ -90,7 +90,7 @@ Router 具体实现手段（规则/轻量模型/LLM）当前未冻结，要求�
 
 状态：`[FROZEN baseline]`
 
-v1 详细合同见 `docs/proceeding/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`。实现尚未开始。Identity Processor（`NO TRANSFORMATION`）是当前 baseline。
+v1 详细合同见 `docs/Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`。实现尚未开始。Identity Processor（`NO TRANSFORMATION`）是当前 baseline。
 
 ## B2.1 Baseline
 
@@ -120,11 +120,13 @@ LLM-as-a-Judge pre-rerank
 
 状态：`[FROZEN]`
 
+v1 详细合同见 `docs/Preprocessing/2026-09-10-B3_Hybrid_Retrieval_Frozen_Requirements_v1.md`。实现尚未开始；A6 已提供其依赖的生产 Collection、Dense 索引与 Native BM25 能力。
+
 ## B3.1 Dense
 
 ```text
 original query
-→ English retrieval instruction
+→ frozen English retrieval instruction
 → Qwen3-Embedding-4B
 → Milvus FLAT/IP
 → Top-20 Leaf
@@ -135,8 +137,19 @@ original query
 ```text
 original query text
 → Milvus Native BM25
+→ UNIFIED_ICU analyzer
 → Top-20 Leaf
 ```
+
+BM25 baseline：
+
+```text
+k1 = 1.2
+b = 0.75
+DAAT_MAXSCORE
+```
+
+Analyzer/BM25 常量由 A6/A6.0 负责，B3 不在应用层重新分词或维护第二套 BM25。
 
 ## B3.3 Baseline Candidate Count
 
@@ -145,36 +158,31 @@ Dense Top-20
 BM25 Top-20
 ```
 
-这不是永久最佳值，但当前作为 baseline。
+这不是永久最佳值，但当前作为 v1 baseline。
 
-## B3.4 Branch Observability
+## B3.4 Production / D1 Observability
 
-必须分别保留/记录：
+线上生产路径优先使用一次 Milvus `hybrid_search`，不要求为了日志额外执行两次单路检索。
 
-```text
-Dense rank
-Dense score
-
-BM25 rank
-BM25 score
-
-chunk_id
-document/source identity
-```
-
-不能只保存融合结果。
-
-这既用于 debug，也用于 D1 stage-wise evaluation。
-
-## B3.5 BM25 Analyzer
-
-中文 BM25 analyzer/tokenizer：
+生产至少保留：
 
 ```text
-[PROVISIONAL]
+request_id
+task_id
+dense encode latency
+hybrid search status / latency
+fused output count
 ```
 
-当前不能由 coding agent 随意选择后宣称完成生产中文检索。
+D1 / profiling 为了 stage-wise evaluation，可以对同一 Query 额外执行：
+
+```text
+Dense-only Top-20
+BM25-only Top-20
+Hybrid + RRF Top-20
+```
+
+并记录 Dense/BM25 原始 rank 与 score。
 
 ---
 
@@ -185,18 +193,24 @@ document/source identity
 ## B4.1 Method
 
 ```text
-RRF
+Milvus Native RRF
 ```
 
-优先使用 Milvus 的 RRF 能力。
+v1 线上优先使用：
+
+```text
+hybrid_search + RRFRanker
+```
+
+B3/B4 是逻辑模块边界，不要求拆成多次 Milvus 网络调用。
 
 ## B4.2 Baseline Parameter
 
 ```text
-k = 55
+k = 60
 ```
 
-必须可配置。
+使用 Milvus 2.5.x 官方默认值作为 v1 baseline；不声称 `60` 是当前语料最优参数。
 
 ## B4.3 Identity / Dedup
 
@@ -206,7 +220,7 @@ RRF 合并的实体身份是：
 chunk_id
 ```
 
-同一 Leaf 被 Dense/BM25 同时召回时应作为一个 Candidate 融合，而不是两条重复结果。
+同一 Leaf 被 Dense/BM25 同时召回时作为一个 Candidate 融合，而不是两条重复结果。
 
 ## B4.4 Output
 
@@ -214,10 +228,12 @@ chunk_id
 Dense Top-20
 BM25 Top-20
 ↓
-RRF(k=55)
+RRFRanker(k=60)
 ↓
 Fused Top-20
 ```
+
+Milvus 返回顺序即 v1 融合顺序；应用层不再计算第二套 RRF 或基于 raw score 做二次融合。
 
 ## B4.5 WeightedRanker
 
@@ -412,9 +428,10 @@ coding agent 不得自行选择一种后当作最终行为。
 2. B2 baseline 不 Rewrite。
 3. Dense/BM25 默认同时开启。
 4. 两支均取 Top-20。
-5. RRF baseline `k=55`。
-6. RRF 输出 Top-20。
-7. Qwen3-Reranker-0.6B → Top-5 Leaf。
-8. Parent Recovery 必须发生在 Rerank 之后。
-9. Context Recovery 使用多级 Section + neighbor fallback。
-10. Retrieval 每阶段必须对 D1 可观察。
+5. BM25 使用 A6 冻结的 `UNIFIED_ICU + k1=1.2 + b=0.75 + DAAT_MAXSCORE`。
+6. RRF baseline `k=60`。
+7. RRF 输出 Top-20。
+8. Qwen3-Reranker-0.6B → Top-5 Leaf。
+9. Parent Recovery 必须发生在 Rerank 之后。
+10. Context Recovery 使用多级 Section + neighbor fallback。
+11. 生产路径不为 observability 强制增加单路检索；D1 可单独运行 Dense/BM25 做 stage-wise evaluation。
