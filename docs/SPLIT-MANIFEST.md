@@ -25,7 +25,7 @@
 |---|---|
 | OCR routing / quality gate | `preprocessing.md` |
 | Leaf Metadata / Chunking / Embedding / Milvus | `knowledge-base.md` |
-| Top-20 / RRF k=55 / Reranker / Top-5 | `retrieval.md` |
+| Top-20 / RRF k=60 / Reranker / Top-5 | `retrieval.md` |
 | ~8K Evidence / generation decoding | `generation.md` |
 | ~50-query benchmark / Recall/MRR / Gold | `evaluation.md` |
 

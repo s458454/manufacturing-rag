@@ -45,10 +45,13 @@ A2 Document Registry   implemented / frozen
 A3 Structure-aware Chunking implemented / frozen
 A4 Hierarchical Parent-Child implementation complete / pending upstream acceptance
 A5 Dense Embedding     implemented
-A6 Milvus Index        design documented / implementation pending
-B1 Query Router        design frozen / implementation pending
-B2 Query Processing    design frozen / implementation pending
-B3-B6 Retrieval        design documented / implementation pending
+A6 Milvus Index        implemented (production Leaf collection)
+B1 Query Router        deterministic core + vLLM client implemented / NOT CLOSED; b1-router-v3 is 7B reference baseline only
+B2 Query Processing    implemented / CLOSED
+B3 Hybrid Retrieval    implemented / not CLOSED (real hybrid_search smoke pending)
+B4 RRF Fusion          implemented / not CLOSED (shared hybrid_search path with B3)
+B5 Cross-Encoder       implemented / not CLOSED (real Qwen3-Reranker smoke pending)
+B6 Context Recovery    design documented / implementation pending
 C1-C3 Generation       design documented / implementation pending
 D1 Retrieval Eval      design documented / implementation pending
 D2 Generation Eval     deferred
@@ -82,7 +85,8 @@ D2 Generation Eval     deferred
 ├── code/
 │   ├── C1-C9/                  # All-in-RAG 历史/教程参考代码
 │   ├── knowledge_base/         # A1 Markdown loading；A2 Document Registry；A3 structure-aware Leaf chunking；A4 Section hierarchy；A5 Dense Embedding
-│   └── preprocessing/          # 当前 A0 正式实现与测试（Docling 主链）
+│   ├── preprocessing/          # 当前 A0 正式实现与测试（Docling 主链）
+│   └── retrieval/              # B1 Router + B2 Identity Processor + B3/B4 hybrid_search + B5 reranker
 ├── data/engineering_docs/      # 当前公开工程技术 PDF 与 manifest
 ├── docling/                    # Docling 源码快照（当前 A0 后端对照）
 ├── mineru/                     # MinerU 3.4.5 源码快照（后续 A0 全量 OCR 迁移，本版未切换）
@@ -163,8 +167,8 @@ docs/
 ├── generation.md
 ├── evaluation.md
 ├── manufacturing-rag-v0.1-spec.md     # 历史 spec
-├── Preprocessing/                      # A0 详细实现/服务器验收资料；含 MinerU 迁移需求
-└── proceeding/                         # 阶段过程与交接；含 A5 实现交接与 B1/B2 v1 冻结需求
+├── Preprocessing/                      # A0 详细实现/服务器验收；B1/B2 Frozen Requirements
+└── proceeding/                         # 阶段过程与交接；含 A 系列与 B1/B2 实现验收记录
 ```
 
 | 需要理解/修改的内容 | 首先阅读 |
@@ -173,7 +177,8 @@ docs/
 | 当前语料、语言范围、数据角色与边界 | `docs/data-corpus.md` |
 | PDF → trusted Markdown、OCR/Layout/Table、质量门禁 | `docs/preprocessing.md` |
 | Markdown Loading、Metadata、Chunk、Hierarchy、Embedding、Milvus | `docs/knowledge-base.md` |
-| Router、Query Processing、Hybrid、RRF、Rerank、Context Recovery | `docs/retrieval.md` |
+| Router、Query Processing、Hybrid、RRF、Rerank、Context Recovery | `docs/retrieval.md`（高层设计） |
+| B1 / B2 冻结需求 | `docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`；`docs/Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md` |
 | Evidence Assembly、Qwen2.5-7B、Citation | `docs/generation.md` |
 | Retrieval Evaluation 与后续 Generation Evaluation 状态 | `docs/evaluation.md` |
 | 当前阶段日志、烟测、问题、验收和交接 | `docs/proceeding/` |

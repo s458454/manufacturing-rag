@@ -1,0 +1,11 @@
+# B1 Query Router serving dependency pin.
+# The production B1 client talks to an OpenAI-compatible HTTP endpoint and does
+# not import vLLM. This file pins the serving stack that must be used before any
+# real-model protocol smoke. Do not auto-upgrade at runtime.
+#
+# Structured decoding backend is frozen to engine-level xgrammar on vLLM
+# 0.8.5 V1. Start the server with --guided-decoding-backend xgrammar.
+# The client sends the same string so a server started with auto is rejected.
+# Do not send xgrammar:no-fallback: V1 0.8.5 CLI/API rejects that value.
+# "auto" is forbidden because it can switch away from xgrammar.
+vllm==0.8.5

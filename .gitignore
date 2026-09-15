@@ -59,6 +59,7 @@ tmp/
 models/*
 !models/main.txt
 !models/preprocessing-models.manifest.json
+!models/retrieval-models.manifest.json
 !models/PageOrientation/
 models/PageOrientation/*
 !models/PageOrientation/PP-LCNet_x1_0_doc_ori/

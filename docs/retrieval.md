@@ -24,7 +24,8 @@ B6 Context Recovery
 
 状态：`[FROZEN]`
 
-v1 详细合同见 `docs/proceeding/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。实现尚未开始。
+v1 详细合同见 `docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。
+确定性内核与 vLLM 模型路径已实现。`b1-router-v3` 是 Qwen2.5-7B-Instruct 的 **reference baseline**，不是 production-accepted Router。B1 **NOT CLOSED**。停止 v4 及针对当前测试集的 prompt patch。14B+v3 本轮否定、不切换；未来重开须独立评估。regression 64 与 blind 64 均保留 gold；blind 对 v3 有效但已 **exposed**，不得再当 unseen CLOSED set。只改 prompt 升 `router_prompt_version`；换模型或合同级行为才升 contract version。B3–B5 继续独立验收；B1→B5 E2E 不得宣称 PASS/CLOSED。见 `docs/proceeding/2026-09-15-b1-experiment-closeout.md`。
 
 ## B1.1 Routes
 
@@ -82,15 +83,25 @@ unsupported
 
 Capability Router 与 safety/policy gate 分离，不混成一个分类体系。
 
-Router 具体实现手段（规则/轻量模型/LLM）当前未冻结，要求是行为契约而不是强制某种分类器。
+v1 Router 实现已冻结为：
+
+```text
+Qwen2.5-7B-Instruct
++
+vLLM OpenAI-compatible API
++
+xgrammar JSON Schema constrained decoding
+```
+
+生产客户端必须发送 `guided_decoding_backend=xgrammar`，与 vLLM 0.8.5 V1 启动参数 `--guided-decoding-backend xgrammar` 逐字一致。禁止 `auto`（会换约束库）和请求级 `xgrammar:no-fallback`（该版本 V1 不接受）。发给 xgrammar 的 `guided_json` 是冻结合同 Schema 的兼容投影：去掉其不支持的 `minItems` / `maxItems` / `minLength`，**不用 `oneOf` 编码业务组合**。`ROUTER_JSON_SCHEMA` 与 business validation 仍保留完整限制；非法 mode/字段组合由二次校验打成 `RouterProtocolError`，不自动修复、不重试。当前实现 prompt 为 `b1-router-v3`（7B reference baseline，非 production-accepted）。合同与 Schema 版本仍为 `b1-contract-v1` / `b1-schema-v1`。B1 不 CLOSED。
 
 ---
 
 # B2 — Query Processing
 
-状态：`[FROZEN baseline]`
+状态：`[FROZEN baseline]`；实现 `[CLOSED]`
 
-v1 详细合同见 `docs/proceeding/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`。实现尚未开始。Identity Processor（`NO TRANSFORMATION`）是当前 baseline。
+v1 详细合同见 `docs/Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`。Identity Processor（`NO TRANSFORMATION` / `identity-v1`）已实现并关闭。
 
 ## B2.1 Baseline
 
@@ -119,6 +130,8 @@ LLM-as-a-Judge pre-rerank
 # B3 — Hybrid Retrieval
 
 状态：`[FROZEN]`
+
+v1 详细合同见 `docs/Preprocessing/2026-09-10-B3_Hybrid_Retrieval_Frozen_Requirements_v1.md`。
 
 ## B3.1 Dense
 
@@ -168,19 +181,23 @@ document/source identity
 
 ## B3.5 BM25 Analyzer
 
-中文 BM25 analyzer/tokenizer：
+中文 BM25 analyzer/tokenizer v1 集成 baseline：
 
 ```text
-[PROVISIONAL]
+UNIFIED_ICU
+tokenizer = icu
+filters = lowercase + removepunct
 ```
 
-当前不能由 coding agent 随意选择后宣称完成生产中文检索。
+Analyzer 的正式 Collection / Function 物理配置属于 A6。B3 不得在应用层维护第二套 BM25。
 
 ---
 
 # B4 — RRF Fusion
 
 状态：`[FROZEN baseline]`
+
+v1 详细合同见 `docs/Preprocessing/2026-09-10-B4_RRF_Fusion_Frozen_Requirements_v1.md`。
 
 ## B4.1 Method
 
@@ -193,10 +210,10 @@ RRF
 ## B4.2 Baseline Parameter
 
 ```text
-k = 55
+k = 60
 ```
 
-必须可配置。
+v1 使用 Milvus 2.5.x `RRFRanker` 官方默认值。这不是已证明的语料最优值；只有 D1 证明融合是稳定瓶颈时才重新打开 k 调参。
 
 ## B4.3 Identity / Dedup
 
@@ -214,7 +231,7 @@ chunk_id
 Dense Top-20
 BM25 Top-20
 ↓
-RRF(k=55)
+RRF(k=60)
 ↓
 Fused Top-20
 ```
@@ -234,6 +251,8 @@ not baseline
 # B5 — Cross-Encoder Reranking
 
 状态：`[FROZEN baseline]`
+
+v1 详细合同见 `docs/Preprocessing/2026-09-10-B5_Cross_Encoder_Reranking_Frozen_Requirements_v1.md`。
 
 ## B5.1 Model
 
@@ -281,11 +300,7 @@ ColBERT 属于 late-interaction retrieval/ranking 路线，当前：
 
 ## B5.4 Reranker Input Serialization
 
-`[PROVISIONAL]`
-
-具体 Query/Chunk template、是否附带 heading context、长 Chunk 截断方式尚未冻结。
-
-Baseline 不得在没有确认的情况下额外拼一套复杂 metadata 文本。
+v1 使用官方 Qwen3-Reranker 模板 + 固定英文 instruction，文档侧只使用 `Leaf.content`。正式修改模板必须升级 B5 contract version。
 
 ## B5.5 Ordering Constraint
 
@@ -412,7 +427,7 @@ coding agent 不得自行选择一种后当作最终行为。
 2. B2 baseline 不 Rewrite。
 3. Dense/BM25 默认同时开启。
 4. 两支均取 Top-20。
-5. RRF baseline `k=55`。
+5. RRF baseline `k=60`。
 6. RRF 输出 Top-20。
 7. Qwen3-Reranker-0.6B → Top-5 Leaf。
 8. Parent Recovery 必须发生在 Rerank 之后。
