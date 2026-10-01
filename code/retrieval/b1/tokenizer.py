@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from retrieval.b1.errors import RouterConfigurationError
-from retrieval.b1.schema import ROUTER_JSON_SCHEMA
 from retrieval.b1.types import ConversationTurn
 
 _MIN_TRANSFORMERS = (4, 37, 0)
@@ -56,11 +54,6 @@ def load_router_tokenizer(tokenizer_id: str) -> Any:
         raise RouterConfigurationError(
             f"Failed to load B1 tokenizer {identifier!r}"
         ) from exc
-
-
-def schema_token_count(tokenizer: Any) -> int:
-    payload = json.dumps(ROUTER_JSON_SCHEMA, ensure_ascii=False, separators=(",", ":"))
-    return count_text_tokens(tokenizer, payload)
 
 
 def count_text_tokens(tokenizer: Any, text: str) -> int:

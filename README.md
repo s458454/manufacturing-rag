@@ -2,7 +2,7 @@
 
 面向制造业公开技术文档的检索增强生成（RAG）实验项目。
 
-当前发布版本为 `ver-0.7`。
+当前发布版本为 `ver-0.8`。
 
 当前状态：
 
@@ -15,17 +15,17 @@ A4  Section Hierarchy                 已实现并验收
 A5  Dense Embedding                   已实现并验收
 A6  Milvus Production Collection      已实现并完成真实语料生产验收
 
-B1  Query Router                      已实现；b1-router-v3 为 7B reference baseline；NOT CLOSED
+B1  Jev Query Router                  已实现；b1-contract-v2 / b1-jev-v1 CLOSED
 B2  Query Processing                  已实现；Identity Processor CLOSED
-B3  Hybrid Retrieval                  已实现；NOT CLOSED（真实 hybrid_search 烟测待独立验收）
+B3  Hybrid Retrieval                  已实现；NOT CLOSED（ver-0.8 真实链路已烟测）
 B4  RRF Fusion                        已实现；NOT CLOSED（与 B3 共用 hybrid_search）
-B5  Cross-Encoder                     已实现；NOT CLOSED（真实 reranker 烟测待独立验收）
-B6  Context Recovery                  设计已文档化，尚未实现
+B5  Cross-Encoder                     已实现；NOT CLOSED（ver-0.8 真实 rerank 已烟测）
+B6  Hierarchical Context Recovery     IMPLEMENTATION COMPLETE；NOT CLOSED
 ```
 
 A6 当前真实生产验收基线为：17 篇可检索文档、2034 个 Leaf，Milvus 2.5.14 单一 Leaf Collection，Dense 使用 `FLAT + IP`，Sparse 使用 Native BM25；真实 `verify`、Dense smoke、BM25 smoke 均已通过。A6 的详细实现与验收记录见 `docs/proceeding/`。
 
-B1 本轮实验结论见 [`docs/proceeding/2026-09-15-b1-experiment-closeout.md`](docs/proceeding/2026-09-15-b1-experiment-closeout.md)：B1 保持 NOT CLOSED；不得宣称 B1→B5 production E2E PASS/CLOSED。
+B1 现网合同是 [`docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md)：`JevQueryRouter` 已 CLOSED。ver-0.7 的 b1-router-v3 实验结论仍见 [`docs/proceeding/2026-09-15-b1-experiment-closeout.md`](docs/proceeding/2026-09-15-b1-experiment-closeout.md)，但不再约束现网。不得把 B1→B6 整链标成 CLOSED。
 
 本项目仍处于分模块重构与验证阶段，不代表整条线上 RAG 已经完成。
 
@@ -54,7 +54,7 @@ docs/proceeding/*.md
 │   ├── C1-C9/                    # All-in-RAG 历史/教程参考代码
 │   ├── knowledge_base/           # A1-A6：Loading / Registry / Leaf / Hierarchy / Embedding / Milvus
 │   ├── preprocessing/            # A0 正式实现（当前仍为 Docling/RapidOCR 主链）
-│   └── retrieval/                # B1 Router + B2 Identity Processor + B3/B4 hybrid_search + B5 reranker
+│   └── retrieval/                # B1 Jev Router + B2 Identity Processor + B3/B4 hybrid_search + B5 reranker + B6 recovery
 ├── data/
 │   ├── EN/                       # 英文原始 PDF
 │   ├── CHN/                      # 中文原始 PDF
@@ -69,7 +69,7 @@ docs/proceeding/*.md
 
 数据清单位于 [`data/engineering_docs/manifest.csv`](data/engineering_docs/manifest.csv)。当前 manifest 注册 27 份 PDF 候选：24 份 NASA/NIST 英文工程文档，以及 3 份中文电力设备技术文档。
 
-当前 `ver-0.7` 真实生产 Collection 使用其中经过当前 canonical pipeline 处理并治理为可检索状态的 17 篇文档（14 EN + 3 CHN），产生 2034 个 Leaf。
+当前 `ver-0.8` 真实生产 Collection 仍使用其中经过当前 canonical pipeline 处理并治理为可检索状态的 17 篇文档（14 EN + 3 CHN），产生 2034 个 Leaf。
 
 这些文档仅用于研究与可复现实验；各文档的权利和使用条件仍以其发布机构及原始来源为准。
 
@@ -83,13 +83,14 @@ docs/proceeding/*.md
 
 当前已冻结的 B 系列具体合同位于：
 
-- [`docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md)
+- [`docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md)
 - [`docs/Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md`](docs/Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md)
 - [`docs/Preprocessing/2026-09-10-B3_Hybrid_Retrieval_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-10-B3_Hybrid_Retrieval_Frozen_Requirements_v1.md)
 - [`docs/Preprocessing/2026-09-10-B4_RRF_Fusion_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-10-B4_RRF_Fusion_Frozen_Requirements_v1.md)
 - [`docs/Preprocessing/2026-09-10-B5_Cross_Encoder_Reranking_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-10-B5_Cross_Encoder_Reranking_Frozen_Requirements_v1.md)
+- [`docs/Preprocessing/2026-09-28-B6_Hierarchical_Context_Recovery_Frozen_Requirements_v1.md`](docs/Preprocessing/2026-09-28-B6_Hierarchical_Context_Recovery_Frozen_Requirements_v1.md)
 
-B1 实验结论（ver-0.7）：
+B1 实验结论（ver-0.7，已被 Jev 合同取代）：
 
 - [`docs/proceeding/2026-09-15-b1-experiment-closeout.md`](docs/proceeding/2026-09-15-b1-experiment-closeout.md)
 

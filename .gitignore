@@ -98,3 +98,6 @@ milvus_data/
 all-in-one-master-complete.md
 agent_backup.md
 manufacturing-rag-docs-split-v1/
+
+# Retired b1-router-v3 QueryRouter. Local snapshot only.
+local_backup/

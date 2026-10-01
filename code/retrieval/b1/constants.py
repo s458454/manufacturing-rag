@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-ROUTER_CONTRACT_VERSION = "b1-contract-v1"
-ROUTER_PROMPT_VERSION = "b1-router-v3"
-ROUTER_SCHEMA_VERSION = "b1-schema-v1"
+ROUTER_CONTRACT_VERSION = "b1-contract-v2"
+ROUTER_PROMPT_VERSION = "b1-jev-v1"
+ROUTER_SCHEMA_VERSION = "b1-result-v1"
 
 ROUTER_MODEL_LOGICAL_ID = "Qwen/Qwen2.5-7B-Instruct"
 STRUCTURED_DECODING_BACKEND = "xgrammar"

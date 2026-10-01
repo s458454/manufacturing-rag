@@ -176,7 +176,7 @@ page marker
 
 # A4 — Hierarchical Parent-Child
 
-状态：多级 hierarchy `[FROZEN / IMPLEMENTED]`；Section text materialization `[FROZEN / IMPLEMENTED]` source span recovery；B6 exact ancestor selection 与生产 Section Store 介质仍 `[PROVISIONAL]`。
+状态：多级 hierarchy `[FROZEN / IMPLEMENTED]`；Section text materialization `[FROZEN / IMPLEMENTED]` source span recovery；生产 Section Store 介质 `[FROZEN]` 为 `sections.jsonl` sidecar。build fingerprint / manifest 仍 `[PROVISIONAL]`。
 
 ## A4.1 Hierarchy
 
@@ -188,20 +188,21 @@ Leaf：
 section_id = nearest semantic Section
 ```
 
-B6 必须能够：
+B6 使用这条已存储的链，并且最多再上升一次 direct Parent：
 
 ```text
 Leaf
 → nearest Section
-→ parent Section
-→ ...
+→ direct Parent
 ```
 
 ## A4.2 Section Text Materialization
 
 Section 使用 trusted `document.md` 的 source span 恢复，不从 Leaf 拼接 Parent，也不持久化完整 `Section.content`。
 
-当前实现为 in-memory `SectionHierarchy`；JSON artifact 只用于 smoke/debug。生产 Section Store 介质仍未冻结。
+生产 Section Store 是 `sections.jsonl`。它只覆盖 A6 metadata 过滤后的 `ACTIVE + VERSION_CONFLICT` 文档，并且必须和 A6 rows 来自同一次 `chunk_parsed_documents`。A4 CLI 的 JSON 仍然只是 debug / smoke artifact。顶层 heading 的 `parent_section_id` 通常是 `None`；不要为了 B6 去改 A4，让 `document_root` 强行成为这些 heading 的 Parent。
+
+`outputs/index_metadata/a6_rows.jsonl` 同时是 B6 的生产部署依赖。B6 启动时读取它并丢掉 `dense_vector`。删掉该文件会使 B6 无法启动，即使 Milvus 与 B3–B5 仍然可用。build fingerprint / manifest 仍未冻结。
 
 Neighbor 通过：
 
@@ -459,13 +460,7 @@ BM25 smoke = PASS
 
 Section hierarchy 不参与第一阶段向量检索。
 
-生产 Section Store 的具体持久化介质仍：
-
-```text
-[PROVISIONAL / implementation-open]
-```
-
-A6 Production Collection 完成不等于该项已经冻结。
+生产介质是 `sections.jsonl` sidecar，只包含 retrievable documents，并与 A6 rows 共用同一次 A3 `ChunkingResult`。`a6_rows.jsonl` 是 B6 生产部署依赖。build fingerprint / manifest 仍是 `[PROVISIONAL]`。
 
 ---
 
@@ -484,4 +479,4 @@ A6 Production Collection 完成不等于该项已经冻结。
 11. 默认检索文档状态仅 `ACTIVE + VERSION_CONFLICT`。
 12. A6 build / ingest-update / rebuild 已冻结实现并通过真实 Milvus 验收。
 13. 当前不使用 HNSW；future ANN 优先 IVF_FLAT。
-14. 生产 Section Store 介质仍未冻结。
+14. 生产 Section Store 是 `sections.jsonl`；`a6_rows.jsonl` 是 B6 生产依赖；fingerprint 仍未冻结。

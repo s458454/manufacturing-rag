@@ -186,3 +186,76 @@ def test_prepare_rows_wires_chunk_embed_and_join(tmp_path: Path, monkeypatch: py
     assert rows[0]["chunk_id"] == "doc-a-chk-0"
     assert rows[0]["document_id"] == "doc-a"
     assert "sparse_vector" not in rows[0]
+
+
+def test_sections_jsonl_is_built_only_for_retrievable_documents(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from knowledge_base import a6_prepare_rows
+    from knowledge_base.a6_document_metadata import write_document_metadata_jsonl
+
+    canonical_root = tmp_path / "canonical"
+    for document_id, body in (
+        ("doc-a", "<!-- PDF page 1 -->\n\n## Kept\nkept body\n"),
+        ("doc-dup", "<!-- PDF page 1 -->\n\n## Dropped\ndropped body\n"),
+    ):
+        folder = canonical_root / document_id
+        folder.mkdir(parents=True)
+        (folder / "document.md").write_text(body, encoding="utf-8")
+
+    metadata_path = tmp_path / "document_metadata.jsonl"
+    write_document_metadata_jsonl(
+        metadata_path,
+        [
+            _metadata("doc-a", status=STATUS_ACTIVE),
+            _metadata("doc-dup", status=STATUS_DUPLICATE),
+        ],
+    )
+    sections_path = tmp_path / "sections.jsonl"
+
+    def fail_chunk_documents(*_args, **_kwargs):
+        raise AssertionError("sections export must not call chunk_documents")
+
+    monkeypatch.setattr(
+        "knowledge_base.leaf_chunker.chunk_documents", fail_chunk_documents
+    )
+    monkeypatch.setattr(
+        "knowledge_base.token_count.load_tokenizer", lambda _tokenizer_id: _Stub()
+    )
+    monkeypatch.setattr(
+        a6_prepare_rows,
+        "_embed_joined_rows",
+        lambda *_args, **_kwargs: [{"chunk_id": "unused"}],
+    )
+
+    _rows, document_count = a6_prepare_rows.prepare_rows(
+        canonical_root,
+        metadata_path,
+        tokenizer_id="stub-tokenizer",
+        sections_jsonl=sections_path,
+    )
+
+    assert document_count == 1
+    assert sections_path.is_file()
+    document_ids = {
+        json.loads(line)["document_id"]
+        for line in sections_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
+    assert document_ids == {"doc-a"}
+
+
+class _Stub:
+    def encode(self, text, add_special_tokens=False, truncation=False):
+        return [ord(char) for char in text]
+
+    def __call__(
+        self,
+        text,
+        add_special_tokens=False,
+        truncation=False,
+        return_offsets_mapping=False,
+    ):
+        ids = self.encode(text, add_special_tokens, truncation)
+        offsets = [(index, index + 1) for index in range(len(text))]
+        return {"input_ids": ids, "offset_mapping": offsets}

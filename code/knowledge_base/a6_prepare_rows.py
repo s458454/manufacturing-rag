@@ -14,6 +14,11 @@ machine can reach Milvus. Does not modify A0-A5 contracts and does not
 re-run A6 document metadata governance: it reads an already-produced
 ``document_metadata.jsonl`` (from ``knowledge_base.a6_document_metadata
 extract``) as the source of truth for which documents are retrievable.
+
+Optional ``--sections-jsonl`` writes the B6 Section Store from the same
+``ChunkingResult``, and only for those retrievable documents. The rows
+JSONL itself is a B6 production dependency: B6 loads it at startup and
+drops ``dense_vector``.
 """
 
 from __future__ import annotations
@@ -79,6 +84,76 @@ def select_retrievable_documents(
     return retrievable_documents, retrievable_metadata
 
 
+def chunk_retrievable_documents(
+    documents: list[LoadedMarkdownDocument],
+    tokenizer: Any,
+    *,
+    chunk_size: int,
+    overlap_tokens: int,
+    sections_jsonl: Path | None = None,
+) -> Any:
+    """Chunk an already-filtered retrievable document list.
+
+    ``documents`` must be the ``ACTIVE + VERSION_CONFLICT`` subset. When
+    ``sections_jsonl`` is set, one ``chunk_parsed_documents`` call feeds both
+    the returned leaves and the Section Store. The default path still calls
+    ``chunk_documents`` and does not write a sidecar.
+    """
+
+    if sections_jsonl is None:
+        from knowledge_base.leaf_chunker import chunk_documents
+
+        return chunk_documents(
+            documents,
+            tokenizer,
+            chunk_size=chunk_size,
+            overlap_tokens=overlap_tokens,
+        )
+
+    from knowledge_base.leaf_chunker import chunk_parsed_documents
+    from knowledge_base.section_hierarchy import (
+        build_section_hierarchy,
+        parse_loaded_documents,
+    )
+    from knowledge_base.section_store import write_sections_jsonl
+
+    parsed = parse_loaded_documents(documents)
+    chunking = chunk_parsed_documents(
+        documents,
+        parsed,
+        tokenizer,
+        chunk_size=chunk_size,
+        overlap_tokens=overlap_tokens,
+    )
+    hierarchy = build_section_hierarchy(documents, parsed, chunking)
+    write_sections_jsonl(hierarchy, sections_jsonl)
+    return chunking
+
+
+def _embed_joined_rows(
+    chunking: Any,
+    retrievable_metadata: dict[str, DocumentMetadata],
+    *,
+    model_name_or_path: str,
+    device: str,
+    batch_size: int,
+    max_input_tokens: int,
+) -> list[dict[str, Any]]:
+    from knowledge_base.dense_embedding import DenseEmbeddingConfig, embed_leaves
+
+    embedding_config = DenseEmbeddingConfig(
+        model_name_or_path=model_name_or_path,
+        max_input_tokens=max_input_tokens,
+        batch_size=batch_size,
+        device=device,
+    )
+    dense_result = embed_leaves(chunking.leaves, config=embedding_config)
+    dense_by_chunk_id = join_leaves_with_embeddings(chunking.leaves, dense_result)
+    return build_collection_rows(
+        chunking.leaves, dense_by_chunk_id, retrievable_metadata
+    )
+
+
 def prepare_rows(
     canonical_root: Path,
     metadata_path: Path,
@@ -90,15 +165,13 @@ def prepare_rows(
     device: str = DEFAULT_DEVICE,
     batch_size: int = DEFAULT_BATCH_SIZE,
     max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS,
+    sections_jsonl: Path | None = None,
 ) -> tuple[list[dict[str, Any]], int]:
     """Full A1->A3->A5->A6-join pipeline. Requires torch/transformers and
     (for a real model) a GPU; only reached once the torch-free filtering in
     ``select_retrievable_documents`` has already succeeded. Returns
     (rows, retrievable_document_count)."""
 
-    # Deferred imports: keep this module importable without torch/transformers.
-    from knowledge_base.dense_embedding import DenseEmbeddingConfig, embed_leaves
-    from knowledge_base.leaf_chunker import chunk_documents
     from knowledge_base.token_count import load_tokenizer
 
     documents = load_markdown_documents(canonical_root)
@@ -108,21 +181,21 @@ def prepare_rows(
     )
 
     tokenizer = load_tokenizer(tokenizer_id)
-    chunking = chunk_documents(
+    chunking = chunk_retrievable_documents(
         retrievable_documents,
         tokenizer,
         chunk_size=chunk_size,
         overlap_tokens=overlap_tokens,
+        sections_jsonl=sections_jsonl,
     )
-    embedding_config = DenseEmbeddingConfig(
+    rows = _embed_joined_rows(
+        chunking,
+        retrievable_metadata,
         model_name_or_path=model_name_or_path,
-        max_input_tokens=max_input_tokens,
-        batch_size=batch_size,
         device=device,
+        batch_size=batch_size,
+        max_input_tokens=max_input_tokens,
     )
-    dense_result = embed_leaves(chunking.leaves, config=embedding_config)
-    dense_by_chunk_id = join_leaves_with_embeddings(chunking.leaves, dense_result)
-    rows = build_collection_rows(chunking.leaves, dense_by_chunk_id, retrievable_metadata)
     return rows, len(retrievable_metadata)
 
 
@@ -150,7 +223,8 @@ def main(argv: list[str] | None = None) -> int:
             "--metadata-jsonl outputs/index_metadata/document_metadata.jsonl "
             "--tokenizer Qwen/Qwen3-Embedding-4B "
             "--device cuda "
-            "--output outputs/index_metadata/a6_rows.jsonl"
+            "--output outputs/index_metadata/a6_rows.jsonl "
+            "--sections-jsonl outputs/index_metadata/sections.jsonl"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -169,6 +243,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     parser.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--sections-jsonl",
+        type=Path,
+        default=None,
+        help=(
+            "Optional B6 sections.jsonl. Built only from retrievable "
+            "documents, using the same ChunkingResult as the A6 rows."
+        ),
+    )
     args = parser.parse_args(argv)
 
     expected_errors: tuple[type[BaseException], ...] = (
@@ -180,8 +263,15 @@ def main(argv: list[str] | None = None) -> int:
     try:
         from knowledge_base.dense_embedding import A5EmbeddingError
         from knowledge_base.leaf_chunker import A3ChunkingError
+        from knowledge_base.section_hierarchy import A4HierarchyError
+        from knowledge_base.section_store import SectionStoreError
 
-        expected_errors = expected_errors + (A5EmbeddingError, A3ChunkingError)
+        expected_errors = expected_errors + (
+            A5EmbeddingError,
+            A3ChunkingError,
+            A4HierarchyError,
+            SectionStoreError,
+        )
     except ImportError as exc:
         print(
             f"error: missing dependency for row preparation (needs torch/transformers): {exc}",
@@ -199,8 +289,9 @@ def main(argv: list[str] | None = None) -> int:
             model_name_or_path=args.model,
             device=args.device,
             batch_size=args.batch_size,
-            max_input_tokens=args.max_input_tokens,
-        )
+        max_input_tokens=args.max_input_tokens,
+        sections_jsonl=args.sections_jsonl,
+    )
         write_rows_jsonl(args.output, rows)
     except expected_errors as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -210,6 +301,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"retrievable_document_count={document_count}")
     print(f"row_count={len(rows)}")
     print(f"output={args.output.resolve()}")
+    if args.sections_jsonl is not None:
+        print(f"sections_jsonl={args.sections_jsonl.resolve()}")
     return 0
 
 

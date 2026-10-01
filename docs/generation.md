@@ -72,19 +72,11 @@ Parent grouping / dedup 后，保持与 Reranker relevance 对应的优先顺序
 
 ## C1.4 Evidence Budget
 
-baseline：
+B6 的 nominal Evidence ceiling 是 `32768 × 0.75 = 24576` tokens。它是 Evidence 上限，不是填满目标。
 
-```text
-~8K tokens
-```
+System prompt、User Query、Evidence metadata、Chat Template、Generation Output 与 Safety Headroom 仍在这 24576 之外，由剩余的至少 8192 tokens 承担。
 
-可配置。
-
-它表示**检索 Evidence 的预算**，不是模型完整 context window。
-
-System prompt、User Query、回答空间仍需另外预留。
-
-精确 accounting：
+C1 在包上 Prompt 之后做最终 `input_tokens + max_new_tokens <= 32768` 校验。System / Query / metadata / `max_new_tokens` 的精确 accounting 仍是：
 
 ```text
 [PROVISIONAL]

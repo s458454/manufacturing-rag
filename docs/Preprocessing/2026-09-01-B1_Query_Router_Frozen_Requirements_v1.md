@@ -1,12 +1,15 @@
 # B1 Query Router — Frozen Requirements v1
 
-> Status: **FROZEN**
+> Status: **SUPERSEDED**
+>
+> 2026-09-29 起不再是权威合同。B1 已按 `b1-contract-v2` 关闭：  
+> `docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md`
 >
 > Contract version: `b1-contract-v1`  
 > Prompt version: `b1-router-v1`  
 > Schema version: `b1-schema-v1`
 >
-> 本文档是 B1 Query Router 的唯一权威需求。  
+> 下文只保留当时的 v1 条文。  
 > Coding agent 不得自行引入替代架构、额外分类器、额外路由策略或未在本文定义的 fallback。
 >
 > B1 的最终验收测试集、长尾样本与验收阈值在 B1 实现完成后另行冻结，不属于本文档的实现歧义。

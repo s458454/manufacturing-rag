@@ -141,8 +141,10 @@ Section hierarchy
 使 B6 可以：
 
 ```text
-Leaf → Section → parent Section
+Leaf → nearest Section → direct Parent
 ```
+
+B6 最多上升一次 direct Parent，不走向 grandparent / LCA。
 
 以及：
 
@@ -226,14 +228,16 @@ Chunk size、未来 IVF 参数、query instruction wording 等必须由实际语
 - Qwen2.5-7B-Instruct generation
 - Strict capability boundary + Evidence-Bounded answer
 - D1 stage-wise retrieval evaluation
+- B6 direct-parent context recovery（ceiling 24576；Pass 1 先于 Parent）
+- Section Store `sections.jsonl` sidecar
 
 ### Provisional
 
-- B6 精确 ancestor expansion policy
+- B6 build fingerprint / manifest
 - C3 claim-level citation 粒度
 - D1 精确 hit/coverage rule
 - BM25 中文 analyzer/tokenizer
-- Section Tree 的具体持久化介质
+- C1 System / Query / metadata / max_new_tokens 精确 accounting
 
 ### Deferred
 

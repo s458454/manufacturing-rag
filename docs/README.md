@@ -25,13 +25,17 @@
 | `proceeding/2026-08-17-a3-freeze.md` | A3 实现交接：结构解析 + Leaf chunking；Linux 122 passed / 3-doc smoke |
 | `proceeding/2026-08-17-a4-section-hierarchy.md` | A4 实现交接：多级 Section hierarchy + source-span recovery；Linux 161 passed / 3-doc smoke；申请关闭 |
 | `proceeding/2026-08-18-a5-dense-embedding.md` | A5 实现交接：Qwen3-Embedding-4B / 2560-d / last-token pooling |
-| `Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md` | B1 Query Router v1 冻结需求 |
+| `Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md` | B1 Jev Router 冻结需求：`b1-contract-v2`，CLOSED |
+| `Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md` | B1 Query Router v1：已被 2026-09-29 合同取代 |
 | `Preprocessing/2026_09_02_B2_Query_Processing_Frozen_Requirements_v1.md` | B2 Query Processing v1 冻结需求 |
 | `Preprocessing/2026-09-10-B3_Hybrid_Retrieval_Frozen_Requirements_v1.md` | B3 Hybrid Retrieval v1 冻结需求 |
 | `Preprocessing/2026-09-10-B4_RRF_Fusion_Frozen_Requirements_v1.md` | B4 RRF Fusion v1 冻结需求 |
 | `Preprocessing/2026-09-10-B5_Cross_Encoder_Reranking_Frozen_Requirements_v1.md` | B5 Cross-Encoder Reranking v1 冻结需求 |
-| `proceeding/2026-09-11-b1-b2-implementation.md` | B1/B2 实现交接：B2 CLOSED；B1 NOT CLOSED |
-| `proceeding/2026-09-15-b1-experiment-closeout.md` | ver-0.7：上游接受 B1 实验结论；v3 为 7B reference baseline |
+| `Preprocessing/2026-09-28-B6_Hierarchical_Context_Recovery_Frozen_Requirements_v1.md` | B6 Hierarchical Context Recovery v1 冻结需求 |
+| `proceeding/2026-09-11-b1-b2-implementation.md` | B1/B2 实现交接：B2 CLOSED；当时 B1 尚未关闭 |
+| `proceeding/2026-09-15-b1-experiment-closeout.md` | ver-0.7：上游接受 B1 实验结论；v3 为当时的 7B reference baseline |
+| `proceeding/2026-09-23-b1-jev-v0-experimental.md` | B1-Jev v0 实验记录。生产关闭见 2026-09-29 合同 |
+| `proceeding/2026-09-28-b1-jev-candidate-status.md` | B1-Jev 接入与冻结记录。2026-09-29 已 CLOSED |
 | `proceeding/2026-09-11-b3-b5-implementation.md` | B3/B4/B5 实现交接：hybrid_search + RRF + Cross-Encoder；均不申请关闭 |
 | `manufacturing-rag-v0.1-spec.md` | 历史 V0.1 spec，与当前模块文档冲突时以模块文档为准 |
 

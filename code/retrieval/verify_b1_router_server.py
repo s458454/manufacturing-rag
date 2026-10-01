@@ -1,6 +1,7 @@
-"""Real vLLM protocol smoke for B1. Does not score routing accuracy.
+"""Live smoke: Jev routes, then B2 processes knowledge tasks. Does not score accuracy.
 
 Requires:
+  TUZI_API_KEY
   B1_VLLM_BASE_URL
   B1_MODEL_ALIAS
   B1_TOKENIZER_NAME_OR_PATH
@@ -51,24 +52,21 @@ def parse_args() -> argparse.Namespace:
 
 
 def run_protocol_smoke() -> None:
-    from retrieval.b1.client import VLLMRouterClient
     from retrieval.b1.config import load_router_config
-    from retrieval.b1.dispatcher import dispatch_knowledge_tasks
     from retrieval.b1.errors import (
         EmptyQueryError,
         RouterProtocolError,
         RouterUnavailableError,
     )
     from retrieval.b1.memory import InMemoryConversationStore
-    from retrieval.b1.router import QueryRouter
+    from retrieval.b1.pipeline import build_jev_router, route_for_b2
     from retrieval.b1.tokenizer import load_router_tokenizer
     from retrieval.b1.types import QueryRequest
 
     config = load_router_config()
     tokenizer = load_router_tokenizer(config.tokenizer_name_or_path)
-    router = QueryRouter(
+    router = build_jev_router(
         config=config,
-        client=VLLMRouterClient(config),
         tokenizer=tokenizer,
         store=InMemoryConversationStore(),
     )
@@ -82,21 +80,20 @@ def run_protocol_smoke() -> None:
 
     knowledge = "NASA-STD-5006A 对铝合金焊接有什么要求？"
     try:
-        result = router.route(
-            QueryRequest(request_id="smoke-direct", conversation_id="c", query=knowledge)
+        result, processed = route_for_b2(
+            router,
+            QueryRequest(request_id="smoke-direct", conversation_id="c", query=knowledge),
         )
     except RouterUnavailableError as exc:
-        raise SystemExit(f"vLLM unavailable: {exc}") from exc
+        raise SystemExit(f"router unavailable: {exc}") from exc
     except RouterProtocolError as exc:
         print("direct_mode=protocol_error")
         raise SystemExit(f"router protocol error: {exc}") from exc
     print(f"direct_mode={result.mode}")
-    if result.mode == "direct":
-        processed = dispatch_knowledge_tasks("smoke-direct", result)
-        print(f"processed_query_count={len(processed)}")
-        for item in processed:
-            if item.original_query != item.retrieval_queries[0]:
-                raise SystemExit("B2 identity invariant failed")
+    print(f"processed_query_count={len(processed)}")
+    for item in processed:
+        if item.original_query != item.retrieval_queries[0]:
+            raise SystemExit("B2 identity invariant failed")
     print("b1_protocol_smoke=ok")
 
 
@@ -110,6 +107,7 @@ def main() -> None:
         print("manifest_check=ok")
         return
     required = (
+        "TUZI_API_KEY",
         "B1_VLLM_BASE_URL",
         "B1_MODEL_ALIAS",
         "B1_TOKENIZER_NAME_OR_PATH",

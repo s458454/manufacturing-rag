@@ -1,0 +1,16 @@
+{"id":"h-039","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 焊接缺陷分类是什么","NASA-STD-8739.4A 压接拉力要求是什么"]}
+{"id":"h-040","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-8739.1B 清洗要求是什么","NASA-STD-4003A 搭接面处理要求是什么"]}
+{"id":"h-041","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 NASA-STD-5009C 超声检测范围","说明 NASA-STD-6030 粉末复验周期","说明 NASA-STD-6016C 禁限用材料用法"]}
+{"id":"h-042","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 YH5WR-17/45 工频耐压","说明兆瓦充电过温保护","说明水贝实训室监控系统要求"]}
+{"id":"h-043","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 NASA-STD-5006A 预热要求","说明 NASA-STD-8739.4A 剥线要求","说明 NASA-STD-4003A 搭接电阻要求","说明 NASA-STD-5009C 渗透检测要求"]}
+{"id":"h-044","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 NASA-STD-6030 粉末复验","说明 NASA-STD-6033 厂房环境","说明 NASA-STD-6016C 禁限用材料","说明 NASA-STD-5017B 寿命试验","说明 NASA-STD-8739.12A 计量溯源"]}
+{"id":"h-045","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 焊缝预热温度如何规定","NASA-STD-8739.4A 压接拉力试验如何规定","NASA-STD-4003A 电气搭接电阻如何规定","NASA-STD-5009C 超声检测范围如何规定","NASA-STD-6030 金属粉末复验如何规定","NASA-STD-8739.1B 灌封固化温度如何规定"]}
+{"id":"h-046","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 焊缝预热温度如何规定","NASA-STD-8739.4A 压接拉力试验如何规定","NASA-STD-4003A 电气搭接电阻限值如何规定","NASA-STD-5009C 渗透检测适用范围如何规定","NASA-STD-6030 金属粉末复验如何规定","NASA-STD-6016C 禁限用材料清单如何使用","NASA-STD-5017B 机构寿命试验如何规定","NASA-STD-8739.1B 灌封固化温度如何规定"]}
+{"id":"ba-039","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 焊后热处理限制是什么","NASA-STD-8739.12A 现场校准如何分工"]}
+{"id":"ba-040","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5017B 卡滞如何预防","NASA-STD-6033 期间核查有哪些"]}
+{"id":"ba-041","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 NASA-STD-8739.1B 粘结表面准备","说明 NASA-STD-4003A 搭接面清洁","说明 NASA-STD-5009C 渗透表面处理"]}
+{"id":"ba-042","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 YH5WR-17/45 操作冲击","说明水贝二次设备仿真性能","说明 NISTIR 7734 规划衔接"]}
+{"id":"ba-043","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["说明 NASA-STD-6030 循环粉末限制","说明 NASA-STD-6016C 合格证明内容","说明 NASA-STD-5017B 卡滞预防","说明 NASA-STD-8739.4A 剥除长度"]}
+{"id":"ba-044","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 允许哪些熔焊接检验方法","NASA-STD-8739.1B 粘结表面如何准备","NASA-HDBK-8739.19-3 扩展不确定度如何报告","NISTIR 7218 智能加工能力有哪些","兆瓦充电绝缘监测如何要求"]}
+{"id":"ba-045","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-4003A 搭接面清洁步骤","NASA-STD-5009C 渗透前后表面处理","NASA-STD-6030 循环粉末限制","NASA-STD-6033 期间核查","NASA-STD-5017B 机构卡滞预防","NASA-STD-8739.12A 现场与实验室校准分工"]}
+{"id":"ba-046","closed":false,"gold_kind":"experimental_multi_task_query","tasks":["NASA-STD-5006A 焊后热处理限制","NASA-STD-8739.4A 绝缘剥除长度","NASA-STD-4003A 搭接面清洁步骤","NASA-STD-5009C 渗透检测表面准备","NASA-STD-6030 循环粉末限制","NASA-STD-6033 期间核查","NASA-STD-5017B 卡滞预防","NASA-STD-8739.12A 现场与实验室校准分工"]}

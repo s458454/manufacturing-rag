@@ -22,10 +22,9 @@ B6 Context Recovery
 
 # B1 — Query Router
 
-状态：`[FROZEN]`
+状态：`[FROZEN]`；实现 `[CLOSED]`
 
-v1 详细合同见 `docs/Preprocessing/2026-09-01-B1_Query_Router_Frozen_Requirements_v1.md`。
-确定性内核与 vLLM 模型路径已实现。`b1-router-v3` 是 Qwen2.5-7B-Instruct 的 **reference baseline**，不是 production-accepted Router。B1 **NOT CLOSED**。停止 v4 及针对当前测试集的 prompt patch。14B+v3 本轮否定、不切换；未来重开须独立评估。regression 64 与 blind 64 均保留 gold；blind 对 v3 有效但已 **exposed**，不得再当 unseen CLOSED set。只改 prompt 升 `router_prompt_version`；换模型或合同级行为才升 contract version。B3–B5 继续独立验收；B1→B5 E2E 不得宣称 PASS/CLOSED。见 `docs/proceeding/2026-09-15-b1-experiment-closeout.md`。
+权威合同是 `docs/Preprocessing/2026-09-29-B1_Jev_Router_Frozen_Requirements_v1.md`（`b1-contract-v2` / `b1-jev-v1`）。`b1-contract-v1` 已停用。判断核是 Jev，Qwen2.5-7B 只做多任务拆分和确认改写。knowledge 任务经 `route_for_b2()` 进入 B2。B3–B6 与 B1→B5 整链不因本次关闭而关闭。
 
 ## B1.1 Routes
 
@@ -83,17 +82,15 @@ unsupported
 
 Capability Router 与 safety/policy gate 分离，不混成一个分类体系。
 
-v1 Router 实现已冻结为：
+已关闭的实现是：
 
 ```text
-Qwen2.5-7B-Instruct
-+
-vLLM OpenAI-compatible API
-+
-xgrammar JSON Schema constrained decoding
+Jev jev-1.13  判断 primary_route，knowledge 再判断 knowledge_mode
+Qwen2.5-7B-Instruct + vLLM + xgrammar  只生成拆分文本或 candidate_query
+Python  组装 RouterResult
 ```
 
-生产客户端必须发送 `guided_decoding_backend=xgrammar`，与 vLLM 0.8.5 V1 启动参数 `--guided-decoding-backend xgrammar` 逐字一致。禁止 `auto`（会换约束库）和请求级 `xgrammar:no-fallback`（该版本 V1 不接受）。发给 xgrammar 的 `guided_json` 是冻结合同 Schema 的兼容投影：去掉其不支持的 `minItems` / `maxItems` / `minLength`，**不用 `oneOf` 编码业务组合**。`ROUTER_JSON_SCHEMA` 与 business validation 仍保留完整限制；非法 mode/字段组合由二次校验打成 `RouterProtocolError`，不自动修复、不重试。当前实现 prompt 为 `b1-router-v3`（7B reference baseline，非 production-accepted）。合同与 Schema 版本仍为 `b1-contract-v1` / `b1-schema-v1`。B1 不 CLOSED。
+拆分和改写发给 xgrammar 的 schema 去掉 `minItems` / `maxItems` / `minLength`。条数和字段组合由 Python 检查，失败不自动修复、不重试。版本是 `b1-contract-v2` / `b1-jev-v1` / `b1-result-v1`。
 
 ---
 
@@ -337,99 +334,13 @@ Leaf Retrieval
 
 # B6 — Hierarchical Context Recovery
 
-状态：主行为 `[FROZEN]`；exact ancestor selection `[PROVISIONAL]`
+状态：`[FROZEN]`。权威合同：`docs/Preprocessing/2026-09-28-B6_Hierarchical_Context_Recovery_Frozen_Requirements_v1.md`。
 
-## B6.1 Input
+B6 不重新检索，不重新打分。恢复顺序是两轮：全部组先做 Leaf → 归一化后的 same-section ±1 Window → nearest Section，然后再做一次 direct Parent。禁止一组 Evidence 先升到 Parent 再处理下一组。
 
-```text
-Reranker Top-5 Leaf
-```
+Parent 只看 direct `parent_section_id`，不按 heading level 硬编码，不走向 grandparent / LCA。`document_root` 仅在它已经是存储中的 direct parent 时按同一规则处理。coverage 阈值 0.50。分子是命中 child 的真正 source-span 并集：A 与 C 命中、中间的 B 未命中时，分子是 `tokens(A) + tokens(C)`，禁止用 bounding span 把 B 算进去。
 
-## B6.2 Recovery
-
-对每个 Leaf：
-
-```text
-Leaf.section_id
-→ nearest Section
-→ parent Section
-→ ...
-```
-
-Parent 不固定 H2/H3。
-
-## B6.3 Shared-parent Grouping
-
-多个高排名 Leaf 可能属于同一个 Section。
-
-必须：
-
-```text
-group
-deduplicate
-```
-
-避免同一大段文本重复进入 C1。
-
-多 Child 命中同一 Parent 时最终 group score/rank aggregation 方式：
-
-```text
-[PROVISIONAL]
-```
-
-## B6.4 Context-recovery Budget
-
-必须受 budget 控制，不能一路向上恢复整篇文档。
-
-独立 recovery budget 的具体数值：
-
-```text
-[PROVISIONAL]
-```
-
-总 Evidence Budget 由 C1 baseline 约 8K tokens 控制。
-
-## B6.5 Parent-too-large Fallback
-
-如果语义 Parent 无法合理使用：
-
-```text
-matched Leaf + neighbor chunks
-```
-
-Neighbor 由：
-
-```text
-document_id + chunk_index
-```
-
-定位。
-
-## B6.6 Exact Ancestor Selection
-
-`[PROVISIONAL]`
-
-已确认：
-
-- 从命中 Leaf 的语义 Section 出发；
-- 动态使用多级 Section；
-- 受 budget 限制；
-- 不固定 Heading level；
-- Parent 不适用则 neighbor fallback。
-
-尚未冻结：
-
-```text
-nearest fitting ancestor 即停止
-```
-
-还是：
-
-```text
-在预算允许时继续向上扩大到更高祖先
-```
-
-coding agent 不得自行选择一种后当作最终行为。
+Evidence ceiling 是 `32768 × 0.75 = 24576` tokens。这是上限，不是填满目标。重叠窗口先合并再计一次 incremental cost。`a6_rows.jsonl` 是 B6 生产部署依赖。`chunk_id` 必须出现在当前 catalog 中，这是 matched-Leaf runtime identity guard，不是 build fingerprint。fingerprint / manifest 仍是 `[PROVISIONAL]`。
 
 ---
 
@@ -444,5 +355,5 @@ coding agent 不得自行选择一种后当作最终行为。
 7. RRF 输出 Top-20。
 8. Qwen3-Reranker-0.6B → Top-5 Leaf。
 9. Parent Recovery 必须发生在 Rerank 之后。
-10. Context Recovery 使用多级 Section + neighbor fallback。
+10. Context Recovery 先做 same-section Window / nearest Section，再最多一次 direct Parent；Evidence ceiling 24576；邻居不跨 Section。
 11. 生产路径不为 observability 强制增加单路检索；D1 可单独运行 Dense/BM25 做 stage-wise evaluation。

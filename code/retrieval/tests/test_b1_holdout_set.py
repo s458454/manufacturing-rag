@@ -16,7 +16,6 @@ from retrieval.b1.constants import (  # noqa: E402
     ROUTER_SCHEMA_VERSION,
 )
 from retrieval.b1.prompt import ROUTER_SYSTEM_PROMPT  # noqa: E402
-from retrieval.b1.schema import ROUTER_GUIDED_JSON_SCHEMA, ROUTER_JSON_SCHEMA  # noqa: E402
 from retrieval.b1.validation import query_length  # noqa: E402
 
 EVAL_DIR = CODE_ROOT / "retrieval" / "eval"
@@ -132,10 +131,8 @@ def test_holdout_gold_invariants() -> None:
 
 
 def test_prompt_v3_and_guided_projection() -> None:
-    assert ROUTER_CONTRACT_VERSION == "b1-contract-v1"
-    assert ROUTER_SCHEMA_VERSION == "b1-schema-v1"
-    assert ROUTER_PROMPT_VERSION == "b1-router-v3"
+    assert ROUTER_CONTRACT_VERSION == "b1-contract-v2"
+    assert ROUTER_SCHEMA_VERSION == "b1-result-v1"
+    assert ROUTER_PROMPT_VERSION == "b1-jev-v1"
     assert "mode 决策（按顺序，只选一个）" in ROUTER_SYSTEM_PROMPT
     assert "【direct】" in ROUTER_SYSTEM_PROMPT
-    assert "oneOf" not in json.dumps(ROUTER_GUIDED_JSON_SCHEMA)
-    assert ROUTER_JSON_SCHEMA["properties"]["tasks"]["maxItems"] == 8

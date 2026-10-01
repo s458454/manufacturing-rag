@@ -1,6 +1,5 @@
-"""B1 Query Router."""
+"""B1 shell plus the Jev production router."""
 
-from retrieval.b1.client import VLLMRouterClient
 from retrieval.b1.config import load_router_config
 from retrieval.b1.constants import (
     MAX_ROUTER_MEMORY_TOKENS,
@@ -30,7 +29,7 @@ from retrieval.b1.errors import (
     RouterUnavailableError,
 )
 from retrieval.b1.memory import InMemoryConversationStore, commit_turn
-from retrieval.b1.router import QueryRouter
+from retrieval.b1.pipeline import build_jev_router, route_for_b2
 from retrieval.b1.types import (
     ConversationTurn,
     QueryRequest,
@@ -40,6 +39,7 @@ from retrieval.b1.types import (
     RouterResult,
     SystemHandler,
 )
+from retrieval.b1_jev.router import JevQueryRouter
 
 __all__ = [
     "MAX_ROUTER_MEMORY_TOKENS",
@@ -54,8 +54,8 @@ __all__ = [
     "EmptyQueryError",
     "InMemoryConversationStore",
     "InvalidQueryError",
+    "JevQueryRouter",
     "QueryRequest",
-    "QueryRouter",
     "QueryTooLongError",
     "RewriteRejected",
     "RoutedTask",
@@ -67,11 +67,12 @@ __all__ = [
     "RouterResult",
     "RouterUnavailableError",
     "SystemHandler",
-    "VLLMRouterClient",
+    "build_jev_router",
     "commit_turn",
     "dispatch_knowledge_tasks",
     "knowledge_processing_requests",
     "load_router_config",
+    "route_for_b2",
     "router_mode_user_reply",
     "system_task_ids",
     "unsupported_user_reply",
